@@ -69,11 +69,14 @@ export default function LandingPage() {
             <span className="text-2xl font-black text-slate-800 tracking-tight">RentGuard</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="hidden sm:block text-sm font-semibold text-slate-600">
+            <Link 
+              href="/auth/login" 
+              className="hidden sm:block text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors duration-200"
+            >
               Sign In
             </Link>
             <Link href="/auth/register">
-              <button className="bg-slate-900 text-white font-bold px-6 py-2 rounded-full text-sm">
+              <button className="bg-slate-900 text-white font-bold px-6 py-2.5 rounded-full text-sm hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-200 shadow-md">
                 Get Started
               </button>
             </Link>
