@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, List, Folder, FileText, Settings, Users } from "lucide-react";
+import { Home, List, Folder, FileText, Settings, Users, DollarSign } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
@@ -19,6 +19,7 @@ export default function Sidebar({ role }: SidebarProps) {
         { name: "My Properties", href: "/dashboard/properties", icon: List },
         { name: "Applications", href: "/dashboard/applications", icon: Folder },
         { name: "Agreements", href: "/dashboard/agreements", icon: FileText },
+        { name: "Payments", href: "/dashboard/payments", icon: DollarSign },
         { name: "Settings", href: "/dashboard/settings", icon: Settings },
       ];
     }
@@ -28,6 +29,7 @@ export default function Sidebar({ role }: SidebarProps) {
         { name: "Browse Properties", href: "/dashboard/properties/browse", icon: List },
         { name: "My Applications", href: "/dashboard/applications", icon: Folder },
         { name: "My Lease", href: "/dashboard/lease", icon: FileText },
+        { name: "Payments", href: "/dashboard/payments", icon: DollarSign },
         { name: "Settings", href: "/dashboard/settings", icon: Settings },
       ];
     }

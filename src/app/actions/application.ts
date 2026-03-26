@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { sendNotification } from "@/lib/notifications";
 
 export async function getLandlordApplications(supabaseUserId: string) {
   try {
@@ -62,6 +63,20 @@ export async function updateApplicationStatus(
         where: { id: app.propertyId },
         data: { status: "RENTED" },
       });
+
+      await sendNotification(
+        app.tenantId,
+        "Application Approved!",
+        `Good news! Your application for ${app.property.title} has been APPROVED by the landlord. A lease agreement has been generated for you.`,
+        "EMAIL"
+      );
+    } else if (status === "REJECTED") {
+      await sendNotification(
+        app.tenantId,
+        "Application Update",
+        `We're sorry to inform you that your application for ${app.property.title} was not accepted at this time.`,
+        "EMAIL"
+      );
     }
 
     revalidatePath("/dashboard/applications");
