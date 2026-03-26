@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏠 RentGuard – Digital Rental Management System
 
-## Getting Started
+## 📌 Project Overview
 
-First, run the development server:
+**RentGuard** is a web-based Digital Rental Management System designed to improve the rental housing process in Ghana. The platform connects **tenants, landlords, and administrators** in a centralized system that enhances transparency, accountability, and efficiency.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The system addresses key challenges in Ghana’s rental sector, including:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* High advance rent payments
+* Poor record-keeping
+* Lack of transparency
+* Frequent landlord–tenant disputes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎯 Objectives
 
-## Learn More
+### General Objective
 
-To learn more about Next.js, take a look at the following resources:
+To develop a digital platform that simplifies rental management and promotes fair housing practices.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Specific Objectives
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* Enable tenants to search and apply for rental properties online
+* Allow landlords to manage property listings and tenants
+* Provide monthly rent tracking and reminders
+* Ensure secure identity verification (Ghana Card integration)
+* Improve transparency and reduce disputes
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏗️ System Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The system follows a **three-tier architecture**:
+
+1. **Presentation Layer (Frontend)**
+
+   * User interface for tenants, landlords, and admins
+
+2. **Application Layer (Backend)**
+
+   * Business logic and API handling (Supabase)
+
+3. **Data Layer (Database)**
+
+   * PostgreSQL database for structured data storage
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer           | Technology                             |
+| --------------- | -------------------------------------- |
+| Frontend        | HTML, CSS, JavaScript (React) |
+| Backend         | Supabase                               |
+| Database        | PostgreSQL                             |
+| Hosting         | Vercel                                 |
+| Version Control | Git & GitHub                           |
+
+---
+
+## 👥 User Roles & Features
+
+### 👤 Tenant
+
+* Register and log in
+* Search for rental properties
+* View property details
+* Apply for rentals
+* Track rent payments
+* Receive notifications and reminders
+
+### 🏢 Landlord
+
+* Add, edit, and manage properties
+* View tenant applications
+* Approve or reject applicants
+* Track rent payments
+* Manage rental agreements
+
+### 🛠️ Administrator
+
+* Manage users (tenants & landlords)
+* Monitor property listings
+* Handle disputes
+* View system reports and logs
+
+---
+
+
+## 🚀 Key Features
+
+* 🔐 Secure authentication system
+* 🏘️ Property listing and search
+* 📄 Digital rental agreements
+* 💳 Rent payment tracking
+* 🔔 Automated notifications
+* 🆔 Identity verification integration
+
+---
+
+
+
+## ✅ Expected Outcomes
+
+* Reduced rental disputes
+* Improved transparency
+* Flexible rent payment tracking
+* Efficient property management
+
+---
+
+## 📚 References
+
+* Rent Act, 1963 (Act 220) – Parliament of Ghana
+* Electronic Transactions Act, 2008 (Act 772)
+* Ministry of Works and Housing (2024)
+* UN-Habitat Ghana Housing Reports
+
+---
+
+
+## ⭐ Support
+
+If you like this project, consider giving it a ⭐ on GitHub!
