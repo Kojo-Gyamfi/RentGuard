@@ -59,24 +59,23 @@ export default function LandingPage() {
       <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-400/20 blur-[120px] pointer-events-none mix-blend-multiply" />
       <div className="absolute bottom-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-emerald-400/20 blur-[120px] pointer-events-none mix-blend-multiply" />
 
-      {/* Navbar - Glassmorphism */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-16 py-4 transition-all duration-300 bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
+      {/* Navbar - Glassmorphism but Static Elements */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-16 py-4 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:rotate-12 transition-transform duration-300">
+          <div className="flex items-center gap-2 cursor-pointer">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-black text-slate-800 tracking-tight">RentGuard</span>
-            <Badge variant="outline" className="ml-2 bg-emerald-50 text-emerald-700 border-emerald-200 uppercase tracking-widest text-[10px] font-bold">Ghana</Badge>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="hidden sm:block text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/auth/login" className="hidden sm:block text-sm font-semibold text-slate-600">
               Sign In
             </Link>
             <Link href="/auth/register">
-              <Button className="font-bold px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 rounded-full">
+              <button className="bg-slate-900 text-white font-bold px-6 py-2 rounded-full text-sm">
                 Get Started
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
@@ -92,18 +91,18 @@ export default function LandingPage() {
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="text-sm font-medium text-white/90">The modern way to manage properties</span>
           </div>
-          
+
           <h1 className="max-w-4xl text-5xl md:text-7xl lg:text-[80px] font-black leading-[1.1] tracking-tight text-white mb-8">
             Renting in Ghana,{" "}
             <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-300 to-orange-400 xl:inline block">
               Reimagined.
             </span>
           </h1>
-          
+
           <p className="max-w-2xl text-lg md:text-xl text-white/80 mb-10 leading-relaxed font-medium">
             RentGuard brings complete transparency, fairness, and high-level efficiency to Ghana&apos;s rental housing market — completely digitizing the experience for landlords and tenants.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link href="/auth/register">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-full bg-white text-slate-900 hover:bg-slate-100 hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-black/20">
@@ -122,7 +121,7 @@ export default function LandingPage() {
       <main className="relative z-10 py-20 px-6 md:px-16 max-w-7xl mx-auto">
 
         {/* Stats Section with Glassmorphism */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-32">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-32">
           {stats.map((s, i) => (
             <div key={i} className="relative group p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white scroll-m-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -132,12 +131,12 @@ export default function LandingPage() {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Features Section */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
-            Everything you need. <br className="hidden md:block"/> Nothing you don&apos;t.
+            Everything you need. <br className="hidden md:block" /> Nothing you don&apos;t.
           </h2>
           <p className="text-slate-600 text-lg max-w-2xl mx-auto">
             A complete ecosystem designed to replace the messy paperwork, relentless phone calls, and constant disputes.
@@ -163,7 +162,7 @@ export default function LandingPage() {
       <section className="relative z-10 py-24 px-6 md:px-16 bg-slate-900 overflow-hidden">
         {/* Glow behind CTA */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-blue-600 to-indigo-600 blur-[100px] opacity-40 mix-blend-screen pointer-events-none" />
-        
+
         <div className="relative max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Ready to upgrade your rental experience?</h2>
           <p className="text-slate-300 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium">
