@@ -11,12 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { syncUserToDatabase } from "@/app/actions/user";
 import Link from "next/link";
-import { UserPlus, User, Home as HomeIcon } from "lucide-react";
+import { UserPlus, User, Home as HomeIcon, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"TENANT" | "LANDLORD">("TENANT");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,16 +90,25 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="reg-password" className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</Label>
-            <Input
-              id="reg-password"
-              type="password"
-              placeholder="••••••••"
-              className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
+            <div className="relative group/pass">
+                <Input
+                  id="reg-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="h-11 rounded-lg border-slate-200 pr-10 focus:ring-blue-500"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+            </div>
           </div>
           <div className="space-y-3">
             <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Register As</Label>

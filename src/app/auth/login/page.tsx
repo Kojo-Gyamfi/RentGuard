@@ -10,11 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -39,8 +40,8 @@ export default function LoginPage() {
   return (
     <Card className="w-full border-none shadow-2xl bg-white/80 backdrop-blur-xl rounded-2xl overflow-hidden">
       <CardHeader className="space-y-1 pb-6 pt-8">
-        <CardTitle className="text-xl font-bold">Welcome Back</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl font-bold italic">Welcome Back</CardTitle>
+        <CardDescription className="font-medium">
           Enter your credentials to manage your rentals.
         </CardDescription>
       </CardHeader>
@@ -61,17 +62,26 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</Label>
-              <a href="#" className="text-xs font-semibold text-blue-600 hover:text-blue-500">Forgot password?</a>
+              <Link href="/auth/forgot-password" className="text-xs font-bold text-blue-600 hover:text-blue-500 hover:underline">Forgot password?</Link>
             </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative group/pass">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="h-11 rounded-lg border-slate-200 pr-10 focus:ring-blue-500"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+            </div>
           </div>
           {error && <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs font-medium text-red-600">{error}</div>}
         </CardContent>
