@@ -56,46 +56,46 @@ export default function RegisterPage() {
   };
 
   return (
-    <Card className="w-full border-none shadow-2xl bg-white/80 backdrop-blur-xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <CardHeader className="space-y-1 pb-6 pt-8">
-        <CardTitle className="text-xl font-bold">Create Account</CardTitle>
-        <CardDescription>
+    <Card className="w-full border border-slate-800 shadow-2xl bg-slate-900/80 backdrop-blur-xl rounded-2xl overflow-hidden">
+      <CardHeader className="space-y-1 pb-4 pt-6">
+        <CardTitle className="text-2xl font-bold text-white tracking-tight">Create Account</CardTitle>
+        <CardDescription className="text-slate-400 font-medium">
           Join thousands of users reinventing rent in Ghana.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleRegister}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Name</Label>
+        <CardContent className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Name</Label>
             <Input
               id="name"
               placeholder="Kwame Mensah"
-              className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
+              className="h-10 rounded-lg border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 focus:ring-blue-600 focus:border-blue-600"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-slate-500">Email Address</Label>
+          <div className="space-y-1">
+            <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address</Label>
             <Input
               id="reg-email"
               type="email"
               placeholder="name@example.com"
-              className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
+              className="h-10 rounded-lg border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 focus:ring-blue-600 focus:border-blue-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reg-password" className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</Label>
+          <div className="space-y-1">
+            <Label htmlFor="reg-password" className="text-xs font-bold uppercase tracking-wider text-slate-400">Password</Label>
             <div className="relative group/pass">
                 <Input
                   id="reg-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="h-11 rounded-lg border-slate-200 pr-10 focus:ring-blue-500"
+                  className="h-10 rounded-lg border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 pr-10 focus:ring-blue-600 focus:border-blue-600"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -104,54 +104,54 @@ export default function RegisterPage() {
                 <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                 >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
             </div>
           </div>
-          <div className="space-y-3">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Register As</Label>
-            <div className="flex gap-3">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Register As</Label>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setRole("TENANT")}
-                className={`flex items-center justify-center gap-2 border-2 rounded-xl p-3 flex-1 transition-all duration-200 ${
+                className={`flex items-center justify-center gap-2 border rounded-xl p-2.5 flex-1 transition-all duration-200 ${
                   role === "TENANT" 
-                  ? "border-blue-600 bg-blue-50 text-blue-700 font-bold shadow-md shadow-blue-100" 
-                  : "border-slate-100 bg-slate-50/50 text-slate-500 font-medium hover:border-slate-200"
+                  ? "border-blue-600 bg-blue-600/10 text-blue-400 font-bold shadow-lg shadow-blue-900/20" 
+                  : "border-slate-800 bg-slate-950/30 text-slate-500 font-medium hover:border-slate-700"
                 }`}
               >
                 <User className="w-4 h-4" />
-                <span>Tenant</span>
+                <span className="text-sm">Tenant</span>
               </button>
               <button
                 type="button"
                 onClick={() => setRole("LANDLORD")}
-                className={`flex items-center justify-center gap-2 border-2 rounded-xl p-3 flex-1 transition-all duration-200 ${
+                className={`flex items-center justify-center gap-2 border rounded-xl p-2.5 flex-1 transition-all duration-200 ${
                   role === "LANDLORD" 
-                  ? "border-blue-600 bg-blue-50 text-blue-700 font-bold shadow-md shadow-blue-100" 
-                  : "border-slate-100 bg-slate-50/50 text-slate-500 font-medium hover:border-slate-200"
+                  ? "border-blue-600 bg-blue-600/10 text-blue-400 font-bold shadow-lg shadow-blue-900/20" 
+                  : "border-slate-800 bg-slate-950/30 text-slate-500 font-medium hover:border-slate-700"
                 }`}
               >
                 <HomeIcon className="w-4 h-4" />
-                <span>Landlord</span>
+                <span className="text-sm">Landlord</span>
               </button>
             </div>
           </div>
-          {error && <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs font-medium text-red-600">{error}</div>}
+          {error && <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-lg text-xs font-medium text-red-400">{error}</div>}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-6 pb-8">
-          <Button type="submit" className="w-full h-11 text-sm font-bold bg-slate-900 hover:bg-slate-800 rounded-lg shadow-lg shadow-slate-200 active:scale-95 transition-all" disabled={loading}>
+        <CardFooter className="flex flex-col space-y-4 pb-6 pt-2">
+          <Button type="submit" className="w-full h-10 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20 active:scale-95 transition-all" disabled={loading}>
             {loading ? "Creating Account..." : (
                 <span className="flex items-center gap-2">
                     Create Account <UserPlus className="w-4 h-4" />
                 </span>
             )}
           </Button>
-          <div className="text-sm text-center font-medium text-slate-500">
+          <div className="text-sm text-center font-medium text-slate-400">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 font-bold hover:underline decoration-2 underline-offset-4">
+            <Link href="/auth/login" className="text-blue-400 font-bold hover:text-blue-300 hover:underline decoration-2 underline-offset-4">
               Sign In
             </Link>
           </div>
