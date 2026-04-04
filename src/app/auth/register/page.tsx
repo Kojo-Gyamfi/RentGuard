@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"TENANT" | "LANDLORD">("TENANT");
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -37,22 +38,43 @@ export default function RegisterPage() {
       },
     });
 
-    if (signUpError || !data.user) {
-      setError(signUpError?.message || "Registration failed. Please try again.");
+    if (signUpError) {
+      const errorMessage = signUpError.message || "";
+      if (errorMessage.toLowerCase().includes("rate limit") || errorMessage.includes("429")) {
+        setError("Too many registration attempts. Please wait a few minutes before trying again or use a different IP.");
+      } else {
+        setError(errorMessage || "Registration failed. Please try again.");
+      }
       setLoading(false);
       return;
     }
 
-    const dbResult = await syncUserToDatabase(data.user.id, email, name, role);
-
-    if (!dbResult.success) {
-      setError("Account created but profile setup failed. Please contact support.");
+    if (data?.user?.identities?.length === 0) {
+      setError("An account with this email already exists. Please sign in.");
       setLoading(false);
       return;
     }
+    
+    if (data.user) {
+        const dbResult = await syncUserToDatabase(data.user.id, email, name, role);
 
-    router.push("/dashboard");
-    router.refresh();
+        if (!dbResult.success) {
+          setError("Account created but profile setup failed. Please contact support.");
+          setLoading(false);
+          return;
+        }
+    }
+
+    // If confirmation is required, Supabase returns the user but no session usually, or just requires them to click a link.
+    // For now we will assume success and route to login or tell them to check email if session is null
+    if (data.session === null) {
+        setSuccessMsg("Account created successfully! Please check your email inbox to verify your account before logging in.");
+        setLoading(false);
+        // Do not redirect, let them read the message
+    } else {
+        router.push("/dashboard");
+        router.refresh();
+    }
   };
 
   return (
@@ -140,8 +162,9 @@ export default function RegisterPage() {
             </div>
           </div>
           {error && <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-lg text-xs font-medium text-red-400">{error}</div>}
+          {successMsg && <div className="p-3 bg-emerald-950/30 border border-emerald-900/50 rounded-lg text-xs font-medium text-emerald-400">{successMsg}</div>}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4 pb-6 pt-2">
+        <CardFooter className="flex flex-col space-y-4 pb-6 pt-2 mt-5">
           <Button type="submit" className="w-full h-10 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20 active:scale-95 transition-all" disabled={loading}>
             {loading ? "Creating Account..." : (
                 <span className="flex items-center gap-2">

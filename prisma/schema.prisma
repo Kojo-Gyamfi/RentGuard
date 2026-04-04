@@ -6,6 +6,83 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id                 String        @id @default(uuid())
+  supabaseUserId     String?       @unique
+  email              String        @unique
+  name               String
+  role               Role          @default(TENANT)
+  phone              String?
+  ghanaCardUrl       String?
+  isVerified         Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  landlordAgreements Agreement[]   @relation("LandlordAgreements")
+  tenantAgreements   Agreement[]   @relation("TenantAgreements")
+  applications       Application[]
+  payments           Payment[]
+  properties         Property[]
+}
+
+model Property {
+  id           String         @id @default(uuid())
+  title        String
+  description  String
+  location     String
+  price        Float
+  images       String[]
+  status       PropertyStatus @default(AVAILABLE)
+  landlordId   String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  agreements   Agreement[]
+  applications Application[]
+  landlord     User           @relation(fields: [landlordId], references: [id])
+}
+
+model Application {
+  id         String            @id @default(uuid())
+  tenantId   String
+  propertyId String
+  status     ApplicationStatus @default(PENDING)
+  message    String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  property   Property          @relation(fields: [propertyId], references: [id])
+  tenant     User              @relation(fields: [tenantId], references: [id])
+}
+
+model Agreement {
+  id         String    @id @default(uuid())
+  propertyId String
+  tenantId   String
+  landlordId String
+  startDate  DateTime
+  endDate    DateTime
+  rentAmount Float
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  landlord   User      @relation("LandlordAgreements", fields: [landlordId], references: [id])
+  property   Property  @relation(fields: [propertyId], references: [id])
+  tenant     User      @relation("TenantAgreements", fields: [tenantId], references: [id])
+  payments   Payment[]
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  agreementId String
+  tenantId    String
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  dueDate     DateTime
+  paidDate    DateTime?
+  reference   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  agreement   Agreement     @relation(fields: [agreementId], references: [id])
+  tenant      User          @relation(fields: [tenantId], references: [id])
+}
+
 enum Role {
   ADMIN
   LANDLORD
@@ -28,84 +105,4 @@ enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-model User {
-  id               String    @id @default(uuid())
-  supabaseUserId   String?   @unique
-  email            String    @unique
-  name             String
-  role             Role      @default(TENANT)
-  phone            String?
-  ghanaCardUrl     String?
-  isVerified       Boolean   @default(false)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  properties         Property[]
-  applications       Application[]
-  tenantAgreements   Agreement[] @relation("TenantAgreements")
-  landlordAgreements Agreement[] @relation("LandlordAgreements")
-  payments           Payment[]
-}
-
-model Property {
-  id          String         @id @default(uuid())
-  title       String
-  description String
-  location    String
-  price       Float
-  images      String[]
-  status      PropertyStatus @default(AVAILABLE)
-  landlordId  String
-  landlord    User           @relation(fields: [landlordId], references: [id])
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  applications Application[]
-  agreements   Agreement[]
-}
-
-model Application {
-  id          String            @id @default(uuid())
-  tenantId    String
-  tenant      User              @relation(fields: [tenantId], references: [id])
-  propertyId  String
-  property    Property          @relation(fields: [propertyId], references: [id])
-  status      ApplicationStatus @default(PENDING)
-  message     String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-}
-
-model Agreement {
-  id          String    @id @default(uuid())
-  propertyId  String
-  property    Property  @relation(fields: [propertyId], references: [id])
-  tenantId    String
-  tenant      User      @relation("TenantAgreements", fields: [tenantId], references: [id])
-  landlordId  String
-  landlord    User      @relation("LandlordAgreements", fields: [landlordId], references: [id])
-  startDate   DateTime
-  endDate     DateTime
-  rentAmount  Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  payments    Payment[]
-}
-
-model Payment {
-  id          String        @id @default(uuid())
-  agreementId String
-  agreement   Agreement     @relation(fields: [agreementId], references: [id])
-  tenantId    String
-  tenant      User          @relation(fields: [tenantId], references: [id])
-  amount      Float
-  status      PaymentStatus @default(PENDING)
-  dueDate     DateTime
-  paidDate    DateTime?
-  reference   String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
 }

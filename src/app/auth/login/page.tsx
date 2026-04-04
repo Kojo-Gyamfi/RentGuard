@@ -29,7 +29,11 @@ export default function LoginPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      setError(signInError.message || "Failed to login. Please check your credentials.");
+      if (signInError.message.includes("Email not confirmed")) {
+        setError("Please verify your email address to sign in. Check your inbox.");
+      } else {
+        setError(signInError.message || "Failed to login. Please check your credentials.");
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -85,7 +89,7 @@ export default function LoginPage() {
           </div>
           {error && <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-lg text-xs font-medium text-red-400">{error}</div>}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-6 pb-8">
+        <CardFooter className="flex flex-col space-y-6 pb-8 mt-5">
           <Button type="submit" className="w-full h-11 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20 active:scale-95 transition-all" disabled={loading}>
             {loading ? "Signing in..." : (
                 <span className="flex items-center gap-2">
