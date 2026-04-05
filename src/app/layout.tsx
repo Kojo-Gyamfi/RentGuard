@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased scroll-smooth">
       <body className={`${outfit.className} min-h-full flex flex-col text-slate-900 bg-slate-50`}>
         <AuthProvider>{children}</AuthProvider>
+        <Toaster position="top-center" richColors theme="system" />
       </body>
     </html>
   );

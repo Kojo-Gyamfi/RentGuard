@@ -26,7 +26,9 @@ export async function syncUserToDatabase(
     return { success: true };
   } catch (error: any) {
     console.error("Error syncing user to database:", error);
-    return { success: false, error: error.message };
+    // Safely serialize the error so it doesn't crash the Next.js server action boundary
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -40,7 +42,7 @@ export async function getUserProfile(supabaseUserId: string) {
       return { success: false, error: "User profile not found in database." };
     }
 
-    return { success: true, user };
+    return { success: true, user: JSON.parse(JSON.stringify(user)) };
   } catch (error: any) {
     console.error("Error fetching user profile:", error);
     return { success: false, error: error.message || "Failed to fetch user profile." };

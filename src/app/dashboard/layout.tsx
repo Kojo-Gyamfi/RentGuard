@@ -3,7 +3,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUserProfile } from "@/app/actions/user";
+import { getUserProfile, syncUserToDatabase } from "@/app/actions/user";
 import Sidebar from "@/components/Sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -17,11 +17,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (!user) {
         router.push("/auth/login");
       } else {
-        getUserProfile(user.id).then((res) => {
+        getUserProfile(user.id).then(async (res) => {
           if (res.success && res.user) {
             setRole(res.user.role);
           } else {
-            console.error(res.error);
+            console.error("Profile not found in Prisma, attempting sync repair...");
+            const repairResult = await syncUserToDatabase(
+              user.id,
+              user.email || "",
+              user.user_metadata?.full_name || "User",
+              user.user_metadata?.role || "TENANT"
+            );
+
+            if (repairResult.success) {
+              const verify = await getUserProfile(user.id);
+              if (verify.success && verify.user) {
+                setRole(verify.user.role);
+              } else {
+                setRole("TENANT"); // Fallback
+              }
+            } else {
+              setRole("TENANT"); // Fallback
+            }
           }
           setProfileLoading(false);
         });
@@ -40,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user || !role) return null;
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
+    <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
       <Sidebar role={role} />
       <main className="flex-1 overflow-y-auto p-8">{children}</main>
     </div>
