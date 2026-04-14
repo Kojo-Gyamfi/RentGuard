@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, List, Folder, FileText, Settings, Users, DollarSign, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface SidebarProps {
   role: string;
@@ -11,6 +12,15 @@ interface SidebarProps {
 export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Successfully logged out.");
+    } catch (error) {
+      toast.error("An error occurred while logging out.");
+    }
+  };
 
   const getLinks = () => {
     if (role === "LANDLORD") {
@@ -75,7 +85,7 @@ export default function Sidebar({ role }: SidebarProps) {
       </nav>
       <div className="p-4 border-t border-slate-200/60">
         <button
-          onClick={signOut}
+          onClick={handleSignOut}
           className="group flex w-full items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 bg-red-500/20 border border-red-200/80 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-200 hover:shadow-sm"
         >
           <LogOut className="h-5 w-5 shrink-0 text-red-500 group-hover:text-white transition-colors" />
