@@ -27,50 +27,37 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
     description: initialData?.description || "",
     location: initialData?.location || "",
     price: initialData?.price?.toString() || "",
-    images: initialData?.images || [],
+    images: initialData?.images || [], // Existing image URLs
   });
   
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // New files to upload
+  const [previews, setPreviews] = useState<string[]>([]); // Preview URLs for new files
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setUploading(true);
-    const uploadedUrls = [...formData.images];
+    const newFiles = Array.from(files);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `property-images/${fileName}`;
-
-      const { error: uploadError, data } = await supabase.storage
-        .from('properties')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        continue;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('properties')
-        .getPublicUrl(filePath);
-      
-      uploadedUrls.push(publicUrl);
-    }
-
-    setFormData({ ...formData, images: uploadedUrls });
-    setUploading(false);
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setPreviews((prev) => [...prev, ...newPreviews]);
   };
 
-  const removeImage = (index: number) => {
-    const newImages = [...formData.images];
-    newImages.splice(index, 1);
-    setFormData({ ...formData, images: newImages });
+  const removeSelectedImage = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_: File, i: number) => i !== index));
+    URL.revokeObjectURL(previews[index]);
+    setPreviews((prev) => prev.filter((_: string, i: number) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_: string, i: number) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,24 +67,55 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
     setLoading(true);
     setError("");
 
-    const data = {
-      ...formData,
-      price: parseFloat(formData.price),
-    };
+    try {
+      const uploadedUrls = [...formData.images];
 
-    let res;
-    if (isEditing && initialData?.id) {
-      res = await updateProperty(initialData.id, data, user.id);
-    } else {
-      res = await createProperty(data, user.id);
-    }
+      // Upload new files only on save
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        for (const file of selectedFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `property-images/${fileName}`;
 
-    if (res.success) {
-      router.push("/dashboard/properties");
-      router.refresh();
-    } else {
-      setError(res.error || `Failed to ${isEditing ? 'update' : 'create'} property.`);
+          const { error: uploadError } = await supabase.storage
+            .from('properties')
+            .upload(filePath, file);
+
+          if (uploadError) throw new Error("Failed to upload some images.");
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('properties')
+            .getPublicUrl(filePath);
+          
+          uploadedUrls.push(publicUrl);
+        }
+        setUploading(false);
+      }
+
+      const data = {
+        ...formData,
+        price: parseFloat(formData.price),
+        images: uploadedUrls,
+      };
+
+      let res;
+      if (isEditing && initialData?.id) {
+        res = await updateProperty(initialData.id, data, user.id);
+      } else {
+        res = await createProperty(data, user.id);
+      }
+
+      if (res.success) {
+        router.push("/dashboard/properties");
+        router.refresh();
+      } else {
+        throw new Error(res.error || `Failed to ${isEditing ? 'update' : 'create'} property.`);
+      }
+    } catch (err: any) {
+      setError(err.message);
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -171,22 +189,41 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
           <div className="space-y-4">
             <Label className="text-sm font-semibold">Property Images</Label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {/* Existing Images */}
               {formData.images.map((url: string, index: number) => (
-                <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-slate-100 bg-slate-50 shadow-sm transition-all hover:border-primary/30">
-                  <img src={url} alt={`Property ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div key={`existing-${index}`} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-slate-100 bg-slate-50 shadow-sm transition-all hover:border-primary/30">
+                  <img src={url} alt={`Existing ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <button
                     type="button"
-                    onClick={() => removeImage(index)}
+                    onClick={() => removeExistingImage(index)}
                     className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 shadow-md transform translate-y-[-4px] group-hover:translate-y-0"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
+
+              {/* New Previews */}
+              {previews.map((url: string, index: number) => (
+                <div key={`new-${index}`} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-primary/20 bg-primary/5 shadow-sm transition-all hover:border-primary/40">
+                  <img src={url} alt={`New Preview ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors" />
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedImage(index)}
+                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 shadow-md transform translate-y-[-4px] group-hover:translate-y-0 z-10"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/80 text-white text-[10px] font-bold rounded uppercase tracking-wider backdrop-blur-sm">
+                    Pending
+                  </div>
+                </div>
+              ))}
               
               <label 
                 className={`relative aspect-square flex flex-col items-center justify-center border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                  uploading 
+                  uploading || loading
                     ? "bg-slate-50 border-slate-200 cursor-not-allowed" 
                     : "bg-primary/5 border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:shadow-inner"
                 }`}
@@ -196,8 +233,8 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
                   multiple
                   accept="image/*"
                   className="hidden"
-                  onChange={handleImageUpload}
-                  disabled={uploading}
+                  onChange={handleImageSelect}
+                  disabled={uploading || loading}
                 />
                 {uploading ? (
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -232,7 +269,7 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
             disabled={loading}
             className="hover:bg-slate-200/50 font-medium text-slate-500"
           >
-            Cancel Listing
+            Cancel
           </Button>
           <Button 
             type="submit" 
@@ -245,7 +282,7 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
                 <span>{isEditing ? "Updating..." : "Publishing..."}</span>
               </span>
             ) : (
-              isEditing ? "Save Changes" : "Publish Listing"
+              isEditing ? "Save Changes" : "Publish"
             )}
           </Button>
         </CardFooter>
