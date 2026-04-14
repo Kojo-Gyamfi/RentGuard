@@ -18,7 +18,7 @@ export async function createProperty(data: any, supabaseUserId: string) {
         price: parseFloat(data.price),
         status: "AVAILABLE",
         landlordId: user.id,
-        images: ["https://placehold.co/600x400?text=Property"],
+        images: data.images || ["https://placehold.co/600x400?text=Property"],
       },
     });
 
@@ -26,6 +26,44 @@ export async function createProperty(data: any, supabaseUserId: string) {
     return { success: true, property };
   } catch (error: any) {
     console.error("Error creating property:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateProperty(id: string, data: any, supabaseUserId: string) {
+  try {
+    const user = await prisma.user.findUnique({ where: { supabaseUserId } });
+    if (!user || user.role !== "LANDLORD") {
+      throw new Error("Unauthorized to update properties.");
+    }
+
+    const property = await prisma.property.update({
+      where: { id },
+      data: {
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        price: parseFloat(data.price),
+        images: data.images,
+      },
+    });
+
+    revalidatePath("/dashboard/properties");
+    return { success: true, property };
+  } catch (error: any) {
+    console.error("Error updating property:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getPropertyById(id: string) {
+  try {
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: { landlord: { select: { name: true, email: true } } },
+    });
+    return { success: true, property };
+  } catch (error: any) {
     return { success: false, error: error.message };
   }
 }

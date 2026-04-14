@@ -65,7 +65,7 @@ export default function PropertiesPage() {
               <CardContent className="p-5">
                 <h3 className="font-bold text-xl mb-2 line-clamp-1">{prop.title}</h3>
                 <div className="flex items-center text-sm text-gray-500 mb-3">
-                  <MapPin className="w-4 h-4 mr-1.5 flex-shrink-0" />
+                  <MapPin className="w-4 h-4 mr-1.5 shrink-0" />
                   <span className="line-clamp-1">{prop.location}</span>
                 </div>
                 <div className="flex justify-between items-end mt-4 pt-4 border-t">
@@ -73,7 +73,9 @@ export default function PropertiesPage() {
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Monthly Rent</p>
                     <p className="font-black text-xl text-primary">GH₵ {prop.price.toLocaleString()}</p>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Link href={`/dashboard/properties/${prop.id}/edit`}>
+                    <Button variant="outline" size="sm" className="hover:bg-primary hover:text-white transition-colors">Edit</Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
