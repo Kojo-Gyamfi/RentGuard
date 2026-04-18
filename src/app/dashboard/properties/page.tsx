@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getPropertiesByLandlord } from "@/app/actions/property";
+import { getPropertiesByLandlord, deleteProperty } from "@/app/actions/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, MapPin, Home } from "lucide-react";
+import { Plus, MapPin, Home, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PropertiesPage() {
   const { user } = useAuth();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -27,6 +28,35 @@ export default function PropertiesPage() {
       });
     }
   }, [user]);
+
+  const handleDelete = async (id: string) => {
+    if (!user) return;
+    
+    toast("Delete this property?", {
+      description: "This action cannot be undone. You cannot delete a property with active rental agreements.",
+      duration: Infinity,
+      action: {
+        label: "Yes, Delete",
+        onClick: async () => {
+          setDeletingId(id);
+          const res = await deleteProperty(id, user.id);
+          if (res.success) {
+            setProperties(prev => prev.filter(p => p.id !== id));
+            toast.success("Property deleted successfully.");
+          } else {
+            toast.error("Failed to delete property", {
+              description: res.error || "Please try again.",
+            });
+          }
+          setDeletingId(null);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
   if (loading) return (
     <div className="flex justify-center items-center h-48">
@@ -73,14 +103,25 @@ export default function PropertiesPage() {
                   <MapPin className="w-4 h-4 mr-1.5 shrink-0" />
                   <span className="line-clamp-1">{prop.location}</span>
                 </div>
-                <div className="flex justify-between items-end mt-4 pt-4 border-t">
-                  <div>
+                <div className="flex justify-between items-end mt-4 pt-4 border-t gap-2">
+                  <div className="flex-1">
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Monthly Rent</p>
                     <p className="font-black text-xl text-primary">GH₵ {prop.price.toLocaleString()}</p>
                   </div>
-                  <Link href={`/dashboard/properties/${prop.id}/edit`}>
-                    <Button variant="outline" size="sm" className="hover:bg-primary hover:text-white transition-colors">Edit</Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href={`/dashboard/properties/${prop.id}/edit`}>
+                      <Button variant="outline" size="sm" className="hover:bg-primary hover:text-white transition-colors">Edit</Button>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDelete(prop.id)}
+                      disabled={deletingId === prop.id}
+                      className="text-red-600 border-red-100 hover:bg-red-50 hover:border-red-200 transition-colors"
+                    >
+                      {deletingId === prop.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

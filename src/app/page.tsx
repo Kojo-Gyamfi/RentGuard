@@ -164,7 +164,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="relative z-10 py-24 px-6 md:px-16 bg-slate-900 overflow-hidden">
         {/* Glow behind CTA */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-blue-600 to-indigo-600 blur-[100px] opacity-40 mix-blend-screen pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[400px] bg-linear-to-r from-blue-600 to-indigo-600 blur-[100px] opacity-40 mix-blend-screen pointer-events-none" />
 
         <div className="relative max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Ready to upgrade your rental experience?</h2>

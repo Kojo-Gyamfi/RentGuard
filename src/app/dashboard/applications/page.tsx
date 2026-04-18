@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getLandlordApplications, getTenantApplications, updateApplicationStatus } from "@/app/actions/application";
+import { getLandlordApplications, getTenantApplications, updateApplicationStatus, cancelApplication } from "@/app/actions/application";
 import { getUserProfile } from "@/app/actions/user";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { User, Mail, Calendar, Home, MapPin, Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -92,6 +94,37 @@ export default function ApplicationsPage() {
     );
   };
 
+  const handleCancel = async (id: string) => {
+    if (!user) return;
+    
+    toast("Withdraw this application?", {
+      description: "This will permanently remove your application from the landlord's list.",
+      duration: Infinity,
+      action: {
+        label: "Yes, Withdraw",
+        onClick: async () => {
+          setProcessingId(id);
+          const res = await cancelApplication(id, user.id);
+          if (res.success) {
+            setApplications(apps => apps.filter(app => app.id !== id));
+            toast.success("Application withdrawn", {
+              description: "Your application has been successfully removed.",
+            });
+          } else {
+            toast.error("Failed to withdraw", {
+              description: res.error || "Please try again.",
+            });
+          }
+          setProcessingId(null);
+        },
+      },
+      cancel: {
+        label: "Keep It",
+        onClick: () => {},
+      },
+    });
+  };
+
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "APPROVED":
@@ -123,9 +156,9 @@ export default function ApplicationsPage() {
             <Home className="mx-auto h-12 w-12 text-gray-300 mb-4" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">No applications yet</h3>
             <p className="text-muted-foreground mb-4">You haven't applied to any properties yet.</p>
-            <Button asChild variant="default">
-              <a href="/dashboard/properties/browse">Browse Properties</a>
-            </Button>
+            <Link href="/dashboard/properties/browse" className={cn(buttonVariants({ variant: "default" }), "mt-4")}>
+              Browse Properties
+            </Link>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -179,6 +212,25 @@ export default function ApplicationsPage() {
                       <Calendar className="w-3 h-3 mr-1" />
                       Applied on {new Date(app.createdAt).toLocaleDateString()}
                     </div>
+
+                    {app.status === "PENDING" && (
+                      <div className="mt-4 pt-4 border-t">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors font-semibold flex items-center justify-center gap-1"
+                          onClick={() => handleCancel(app.id)}
+                          disabled={processingId === app.id}
+                        >
+                          {processingId === app.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
+                          Withdraw Application
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );

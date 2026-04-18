@@ -56,6 +56,39 @@ export async function updateProperty(id: string, data: any, supabaseUserId: stri
   }
 }
 
+export async function deleteProperty(id: string, supabaseUserId: string) {
+  try {
+    const user = await prisma.user.findUnique({ where: { supabaseUserId } });
+    if (!user || user.role !== "LANDLORD") {
+      throw new Error("Unauthorized to delete properties.");
+    }
+
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: { agreements: true }
+    });
+
+    if (!property || property.landlordId !== user.id) {
+      throw new Error("Property not found or unauthorized.");
+    }
+
+    if (property.agreements.length > 0) {
+       throw new Error("Cannot delete a property with active rental agreements.");
+    }
+
+    await prisma.property.delete({
+      where: { id },
+    });
+
+    revalidatePath("/dashboard/properties");
+    revalidatePath("/dashboard/properties/browse");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting property:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getPropertyById(id: string) {
   try {
     const property = await prisma.property.findUnique({

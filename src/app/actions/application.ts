@@ -31,6 +31,34 @@ export async function getTenantApplications(supabaseUserId: string) {
   }
 }
 
+export async function cancelApplication(applicationId: string, supabaseUserId: string) {
+  try {
+    const user = await prisma.user.findUnique({ where: { supabaseUserId } });
+    if (!user || user.role !== "TENANT") throw new Error("Unauthorized.");
+
+    const app = await prisma.application.findUnique({
+      where: { id: applicationId },
+    });
+
+    if (!app || app.tenantId !== user.id) {
+      throw new Error("Application not found or unauthorized.");
+    }
+
+    if (app.status !== "PENDING") {
+      throw new Error("Only pending applications can be cancelled.");
+    }
+
+    await prisma.application.delete({
+      where: { id: applicationId },
+    });
+
+    revalidatePath("/dashboard/applications");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getLandlordApplications(supabaseUserId: string) {
   try {
     const user = await prisma.user.findUnique({ where: { supabaseUserId } });
