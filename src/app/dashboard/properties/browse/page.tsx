@@ -6,7 +6,9 @@ import { getAllAvailableProperties, applyForProperty } from "@/app/actions/prope
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search } from "lucide-react";
+import { Textarea } from "@/components/ui/Textarea";
+import { MapPin, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function BrowsePropertiesPage() {
   const { user } = useAuth();
@@ -14,6 +16,7 @@ export default function BrowsePropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [applyingTo, setApplyingTo] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("I am interested in this property and would like to arrange a viewing or proceed with the application.");
 
   useEffect(() => {
@@ -34,16 +37,26 @@ export default function BrowsePropertiesPage() {
 
   const handleApply = async (propertyId: string) => {
     if (!user) return;
+    setSubmitting(true);
     try {
       const res = await applyForProperty(propertyId, message, user.id);
       if (res.success) {
-        alert("Application submitted successfully! The landlord will back get to you soon.");
+        toast.success("Application submitted!", {
+          description: "The landlord will review your application and get back to you soon.",
+        });
         setApplyingTo(null);
+        setMessage("I am interested in this property and would like to arrange a viewing or proceed with the application.");
       } else {
-        alert(res.error || "Failed to submit application.");
+        toast.error("Application failed", {
+          description: res.error || "Could not submit your application. Please try again.",
+        });
       }
     } catch (error: any) {
-      alert("An error occurred during application submission.");
+      toast.error("Something went wrong", {
+        description: "An unexpected error occurred. Please try again later.",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,15 +115,26 @@ export default function BrowsePropertiesPage() {
                 </div>
                 {applyingTo === prop.id ? (
                   <div className="w-full space-y-3 animate-in slide-in-from-top-2">
-                    <Input 
+                    <Textarea 
                       placeholder="Add a message to the landlord..." 
                       value={message} 
                       onChange={(e) => setMessage(e.target.value)} 
-                      className="text-sm border-primary/20 focus-visible:ring-primary/30"
+                      className="text-sm border-primary/20 focus-visible:ring-primary/30 min-h-[80px] resize-none"
+                      rows={3}
                     />
                     <div className="flex gap-2 w-full">
-                      <Button className="flex-1 font-semibold" onClick={() => handleApply(prop.id)}>Submit</Button>
-                      <Button variant="outline" className="flex-1" onClick={() => setApplyingTo(null)}>Cancel</Button>
+                      <Button
+                        className="flex-1 font-semibold"
+                        onClick={() => handleApply(prop.id)}
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</>
+                        ) : (
+                          "Submit Application"
+                        )}
+                      </Button>
+                      <Button variant="outline" className="flex-1" onClick={() => setApplyingTo(null)} disabled={submitting}>Cancel</Button>
                     </div>
                   </div>
                 ) : (

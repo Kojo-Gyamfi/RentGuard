@@ -5,11 +5,14 @@ import { getPendingVerifications, approveVerification } from "@/app/actions/admi
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, User, Mail, Calendar } from "lucide-react";
+import { ShieldCheck, User, Mail, Calendar, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VerificationsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     getPendingVerifications().then((res) => {
@@ -19,12 +22,19 @@ export default function VerificationsPage() {
   }, []);
 
   const handleApprove = async (userId: string) => {
+    setProcessingId(userId);
     const res = await approveVerification(userId);
     if (res.success) {
       setUsers((prev) => prev.filter((u) => u.id !== userId));
+      toast.success("User verified!", {
+        description: "The user now has full access to RentGuard features.",
+      });
     } else {
-      alert("Failed to approve verification.");
+      toast.error("Verification failed", {
+        description: "Could not approve this user. Please try again.",
+      });
     }
+    setProcessingId(null);
   };
 
   if (loading) return (
@@ -76,10 +86,19 @@ export default function VerificationsPage() {
                 <p className="text-xs text-muted-foreground mt-1 text-center">Click to view full size</p>
               </CardContent>
               <CardFooter className="border-t pt-4 bg-gray-50/50 flex gap-3">
-                <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold" onClick={() => handleApprove(u.id)}>
-                  <ShieldCheck className="w-4 h-4 mr-1.5" /> Approve
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                  onClick={() => handleApprove(u.id)}
+                  disabled={processingId === u.id}
+                >
+                  {processingId === u.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  ) : (
+                    <ShieldCheck className="w-4 h-4 mr-1.5" />
+                  )}
+                  Approve
                 </Button>
-                <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50 font-semibold">
+                <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50 font-semibold" disabled={processingId === u.id}>
                   Reject
                 </Button>
               </CardFooter>

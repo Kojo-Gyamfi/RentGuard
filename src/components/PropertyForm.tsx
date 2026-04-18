@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/Textarea";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface PropertyFormProps {
   initialData?: any;
@@ -34,7 +35,6 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
   const [previews, setPreviews] = useState<string[]>([]); // Preview URLs for new files
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -65,7 +65,6 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
     if (!user) return;
     
     setLoading(true);
-    setError("");
 
     try {
       const uploadedUrls = [...formData.images];
@@ -107,13 +106,20 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
       }
 
       if (res.success) {
+        toast.success(isEditing ? "Property updated!" : "Property published!", {
+          description: isEditing 
+            ? "The changes to your property listing have been saved."
+            : "Your property is now live and tenants can start applying.",
+        });
         router.push("/dashboard/properties");
         router.refresh();
       } else {
         throw new Error(res.error || `Failed to ${isEditing ? 'update' : 'create'} property.`);
       }
     } catch (err: any) {
-      setError(err.message);
+      toast.error("Operation failed", {
+        description: err.message,
+      });
       setLoading(false);
       setUploading(false);
     }
@@ -253,12 +259,7 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
             </p>
           </div>
 
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-              <span>{error}</span>
-            </div>
-          )}
+
         </CardContent>
         
         <CardFooter className="flex justify-end space-x-4 border-t px-6 py-5 bg-slate-50/50">

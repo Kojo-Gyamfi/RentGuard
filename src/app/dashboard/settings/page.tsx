@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ShieldAlert, UploadCloud, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -47,14 +48,18 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        alert("Ghana Card uploaded successfully! Awaiting admin approval.");
+        toast.success("Ghana Card uploaded!", {
+          description: "Your document is now awaiting admin approval.",
+        });
         setProfile({ ...profile, ghanaCardUrl: data.publicUrl });
         setFile(null);
       } else {
         throw new Error("Failed to update profile.");
       }
     } catch (error: any) {
-      alert(`Error uploading: ${error.message} \n\nNote: Ensure you have created a public bucket named 'verifications' in Supabase Storage.`);
+      toast.error("Upload failed", {
+        description: `${error.message}. Ensure you have a public bucket named 'verifications' in Supabase Storage.`,
+      });
     } finally {
       setUploading(false);
     }

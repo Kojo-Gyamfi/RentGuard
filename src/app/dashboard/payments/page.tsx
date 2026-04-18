@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Receipt } from "lucide-react";
+import { toast } from "sonner";
 import { getUserProfile } from "@/app/actions/user";
 
 export default function PaymentsPage() {
@@ -54,14 +55,18 @@ export default function PaymentsPage() {
     
     const res = await logPayment(selectedAgreement, parseFloat(amount), reference, user.id);
     if (res.success) {
-      alert("Payment logged successfully.");
+      toast.success("Payment logged successfully!", {
+        description: `GH₵ ${parseFloat(amount).toLocaleString()} recorded with reference ${reference}.`,
+      });
       setAmount("");
       setReference("");
       // reload payments
       const payRes = await getPayments(user.id, "TENANT");
       if (payRes.success) setPayments(payRes.payments || []);
     } else {
-      alert("Failed to log payment.");
+      toast.error("Failed to log payment", {
+        description: "Please check your details and try again.",
+      });
     }
     setSubmitting(false);
   };

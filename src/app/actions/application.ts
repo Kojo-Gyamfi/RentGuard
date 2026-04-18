@@ -4,6 +4,33 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendNotification } from "@/lib/notifications";
 
+export async function getTenantApplications(supabaseUserId: string) {
+  try {
+    const user = await prisma.user.findUnique({ where: { supabaseUserId } });
+    if (!user || user.role !== "TENANT") throw new Error("Unauthorized.");
+
+    const applications = await prisma.application.findMany({
+      where: { tenantId: user.id },
+      include: {
+        property: {
+          select: {
+            title: true,
+            price: true,
+            location: true,
+            images: true,
+            landlord: { select: { name: true, email: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return { success: true, applications };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getLandlordApplications(supabaseUserId: string) {
   try {
     const user = await prisma.user.findUnique({ where: { supabaseUserId } });
