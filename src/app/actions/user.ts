@@ -48,3 +48,19 @@ export async function getUserProfile(supabaseUserId: string) {
     return { success: false, error: error.message || "Failed to fetch user profile." };
   }
 }
+
+export async function updateUserProfile(
+  supabaseUserId: string,
+  data: { name?: string; phone?: string }
+) {
+  try {
+    const updated = await prisma.user.update({
+      where: { supabaseUserId },
+      data,
+    });
+    return { success: true, user: JSON.parse(JSON.stringify(updated)) };
+  } catch (error: any) {
+    console.error("Error updating user profile:", error);
+    return { success: false, error: error.message || "Failed to update profile." };
+  }
+}

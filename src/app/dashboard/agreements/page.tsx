@@ -3,22 +3,36 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAgreements } from "@/app/actions/agreement";
+import { getUserProfile } from "@/app/actions/user";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FileText, Calendar, DollarSign, User } from "lucide-react";
+import { FileText, Calendar, DollarSign, User, Mail, Phone, MapPin } from "lucide-react";
 
 export default function AgreementsPage() {
   const { user } = useAuth();
   const [agreements, setAgreements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      getAgreements(user.id, "LANDLORD").then((res) => {
-        if (res.success) setAgreements(res.agreements || []);
-        setLoading(false);
+      getUserProfile(user.id).then((res) => {
+        if (res.success && res.user) {
+          const userRole = res.user.role;
+          setRole(userRole);
+          loadAgreements(userRole as "LANDLORD" | "TENANT");
+        } else {
+          setLoading(false);
+        }
       });
     }
   }, [user]);
+
+  const loadAgreements = async (userRole: "LANDLORD" | "TENANT") => {
+    if (!user) return;
+    const res = await getAgreements(user.id, userRole);
+    if (res.success) setAgreements(res.agreements || []);
+    setLoading(false);
+  };
 
   if (loading) return (
     <div className="flex justify-center items-center h-48">
@@ -30,7 +44,7 @@ export default function AgreementsPage() {
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm border border-t-4 border-t-primary">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Active Agreements</h1>
-        <p className="text-muted-foreground">Manage your finalized rental leases and tenant details.</p>
+        <p className="text-muted-foreground">Manage your finalized rental leases and contact details.</p>
       </div>
 
       {agreements.length === 0 ? (
@@ -41,36 +55,71 @@ export default function AgreementsPage() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {agreements.map((agreement) => (
-            <Card key={agreement.id} className="shadow-sm border-gray-200">
-              <CardHeader className="bg-slate-50 border-b pb-4">
-                <CardTitle className="text-xl line-clamp-1">{agreement.property.title}</CardTitle>
-                <CardDescription className="flex items-center mt-2">
-                  <User className="w-4 h-4 mr-2" /> Tenant: <span className="font-semibold text-gray-900 ml-1">{agreement.tenant.name}</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-gray-50 p-3 rounded-lg border">
-                    <p className="text-xs text-gray-500 font-semibold uppercase mb-1 flex items-center"><Calendar className="w-3.5 h-3.5 mr-1"/> Start Date</p>
-                    <p className="font-medium">{new Date(agreement.startDate).toLocaleDateString()}</p>
+          {agreements.map((agreement) => {
+            const otherParty = role === "LANDLORD" ? agreement.tenant : agreement.landlord;
+            const otherPartyLabel = role === "LANDLORD" ? "Tenant" : "Landlord";
+
+            return (
+              <Card key={agreement.id} className="shadow-sm border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <CardHeader className="bg-slate-50 border-b pb-4">
+                  <CardTitle className="text-xl line-clamp-1 flex items-center">
+                    <FileText className="w-5 h-5 mr-2 text-primary" />
+                    {agreement.property.title}
+                  </CardTitle>
+                  <CardDescription className="flex items-center mt-2 text-gray-600">
+                    <MapPin className="w-3.5 h-3.5 mr-1.5" />
+                    {agreement.property.location}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  {/* Other Party Info */}
+                  <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="bg-primary/10 p-1.5 rounded-full mr-2">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider leading-none mb-0.5">{otherPartyLabel}</p>
+                        <p className="font-bold text-gray-900 leading-none">{otherParty.name}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-2 mt-3 pt-3 border-t">
+                      <a href={`mailto:${otherParty.email}`} className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors">
+                        <Mail className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                        {otherParty.email}
+                      </a>
+                      {otherParty.phone && (
+                        <a href={`tel:${otherParty.phone}`} className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors">
+                          <Phone className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                          {otherParty.phone}
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg border">
-                    <p className="text-xs text-gray-500 font-semibold uppercase mb-1 flex items-center"><Calendar className="w-3.5 h-3.5 mr-1"/> End Date</p>
-                    <p className="font-medium">{new Date(agreement.endDate).toLocaleDateString()}</p>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-gray-50 p-3 rounded-lg border">
+                      <p className="text-xs text-gray-500 font-semibold uppercase mb-1 flex items-center"><Calendar className="w-3.5 h-3.5 mr-1"/> Start Date</p>
+                      <p className="font-medium">{new Date(agreement.startDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg border">
+                      <p className="text-xs text-gray-500 font-semibold uppercase mb-1 flex items-center"><Calendar className="w-3.5 h-3.5 mr-1"/> End Date</p>
+                      <p className="font-medium">{new Date(agreement.endDate).toLocaleDateString()}</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
-                  <div className="flex items-center text-primary font-bold text-sm mb-1">
-                    <DollarSign className="w-4 h-4 mr-1" />
-                    Monthly Rent
+                  
+                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
+                    <div className="flex items-center text-primary font-bold text-sm mb-1">
+                      <DollarSign className="w-4 h-4 mr-1" />
+                      Monthly Rent
+                    </div>
+                    <span className="text-2xl font-black text-primary">GH₵ {agreement.rentAmount.toLocaleString()}</span>
                   </div>
-                  <span className="text-2xl font-black text-primary">GH₵ {agreement.rentAmount.toLocaleString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

@@ -13,8 +13,8 @@ export async function getAgreements(supabaseUserId: string, role: "LANDLORD" | "
       where: whereClause,
       include: {
         property: { select: { title: true, location: true } },
-        tenant: { select: { name: true, email: true } },
-        landlord: { select: { name: true, email: true } },
+        tenant: { select: { name: true, email: true, phone: true } },
+        landlord: { select: { name: true, email: true, phone: true } },
       },
       orderBy: { createdAt: "desc" },
     });

@@ -9,7 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { User, Mail, Calendar, Home, MapPin, Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { User, Mail, Phone, Calendar, Home, MapPin, Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ApplicationsPage() {
@@ -198,6 +198,18 @@ export default function ApplicationsPage() {
                       <div className="text-right">
                         <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Landlord</p>
                         <p className="text-sm font-medium text-gray-900">{app.property.landlord?.name || 'N/A'}</p>
+                        <div className="flex flex-col items-end gap-1 mt-1">
+                          <a href={`mailto:${app.property.landlord?.email}`} className="text-[10px] text-primary hover:underline flex items-center">
+                            <Mail className="w-2.5 h-2.5 mr-1" />
+                            {app.property.landlord?.email}
+                          </a>
+                          {app.property.landlord?.phone && (
+                            <a href={`tel:${app.property.landlord?.phone}`} className="text-[10px] text-gray-500 hover:underline flex items-center">
+                              <Phone className="w-2.5 h-2.5 mr-1" />
+                              {app.property.landlord?.phone}
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -289,8 +301,18 @@ export default function ApplicationsPage() {
                     </div>
                     <div className="flex items-center text-sm">
                       <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                      <span className="text-gray-600">{app.tenant.email}</span>
+                      <a href={`mailto:${app.tenant.email}`} className="text-gray-600 hover:text-primary transition-colors">
+                        {app.tenant.email}
+                      </a>
                     </div>
+                    {app.tenant.phone && (
+                      <div className="flex items-center text-sm">
+                        <Phone className="w-4 h-4 text-gray-400 mr-2" />
+                        <a href={`tel:${app.tenant.phone}`} className="text-gray-600 hover:text-primary transition-colors">
+                          {app.tenant.phone}
+                        </a>
+                      </div>
+                    )}
                     
                     <div className="mt-4 pt-3 border-t">
                       <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Applicant Message</p>

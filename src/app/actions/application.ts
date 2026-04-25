@@ -18,7 +18,7 @@ export async function getTenantApplications(supabaseUserId: string) {
             price: true,
             location: true,
             images: true,
-            landlord: { select: { name: true, email: true } },
+            landlord: { select: { name: true, email: true, phone: true } },
           },
         },
       },
