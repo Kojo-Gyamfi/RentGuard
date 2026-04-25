@@ -13,7 +13,8 @@ model User {
   name               String
   role               Role          @default(TENANT)
   phone              String?
-  ghanaCardUrl       String?
+  ghanaCardFrontUrl  String?
+  ghanaCardBackUrl   String?
   isVerified         Boolean       @default(false)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt

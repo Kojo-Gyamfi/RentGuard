@@ -13,37 +13,53 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
+    let isSubscribed = true;
+
+    async function checkProfile() {
+      if (loading || !user) return;
+
+      try {
+        const res = await getUserProfile(user.id);
+        
+        if (res.success && res.user) {
+          if (isSubscribed) setRole(res.user.role);
+        } else {
+          // Attempt repair if not found
+          const repairResult = await syncUserToDatabase(
+            user.id,
+            user.email || "",
+            user.user_metadata?.full_name || "User",
+            user.user_metadata?.role || "TENANT"
+          );
+
+          if (repairResult.success) {
+            const verify = await getUserProfile(user.id);
+            if (verify.success && verify.user) {
+              if (isSubscribed) setRole(verify.user.role);
+            } else {
+              if (isSubscribed) setRole("TENANT");
+            }
+          } else {
+            console.error("Critical: User synchronization failed", repairResult.error);
+            if (isSubscribed) setRole("TENANT");
+          }
+        }
+      } catch (err) {
+        console.error("Dashboard profile check failed:", err);
+      } finally {
+        if (isSubscribed) setProfileLoading(false);
+      }
+    }
+
     if (!loading) {
       if (!user) {
         router.push("/auth/login");
       } else {
-        getUserProfile(user.id).then(async (res) => {
-          if (res.success && res.user) {
-            setRole(res.user.role);
-          } else {
-            console.error("Profile not found in Prisma, attempting sync repair...");
-            const repairResult = await syncUserToDatabase(
-              user.id,
-              user.email || "",
-              user.user_metadata?.full_name || "User",
-              user.user_metadata?.role || "TENANT"
-            );
-
-            if (repairResult.success) {
-              const verify = await getUserProfile(user.id);
-              if (verify.success && verify.user) {
-                setRole(verify.user.role);
-              } else {
-                setRole("TENANT"); // Fallback
-              }
-            } else {
-              setRole("TENANT"); // Fallback
-            }
-          }
-          setProfileLoading(false);
-        });
+        checkProfile();
       }
     }
+
+    return () => { isSubscribed = false; };
   }, [user, loading, router]);
 
   if (loading || profileLoading) {

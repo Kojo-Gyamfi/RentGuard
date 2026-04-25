@@ -5,7 +5,7 @@ import { getPendingVerifications, approveVerification } from "@/app/actions/admi
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, User, Mail, Calendar, Loader2 } from "lucide-react";
+import { ShieldCheck, User, Mail, Phone, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function VerificationsPage() {
@@ -70,20 +70,47 @@ export default function VerificationsPage() {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" /> {u.name}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5" /> {u.email}
-                </CardDescription>
+                <div className="mt-2 space-y-1.5">
+                  <a href={`mailto:${u.email}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group">
+                    <Mail className="w-3.5 h-3.5 group-hover:text-primary" />
+                    <span className="truncate">{u.email}</span>
+                  </a>
+                  {u.phone ? (
+                    <a href={`tel:${u.phone}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group">
+                      <Phone className="w-3.5 h-3.5 group-hover:text-primary" />
+                      <span>{u.phone}</span>
+                    </a>
+                  ) : (
+                    <span className="flex items-center gap-2 text-sm text-gray-400 italic">
+                      <Phone className="w-3.5 h-3.5" /> No phone number
+                    </span>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="pt-5">
-                <p className="text-sm font-semibold text-muted-foreground mb-2">Submitted Ghana Card:</p>
-                <a href={u.ghanaCardUrl} target="_blank" rel="noreferrer">
-                  <img
-                    src={u.ghanaCardUrl}
-                    alt="Ghana Card"
-                    className="w-full h-36 object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer"
-                  />
-                </a>
-                <p className="text-xs text-muted-foreground mt-1 text-center">Click to view full size</p>
+              <CardContent className="pt-5 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Front View</p>
+                    <a href={u.ghanaCardFrontUrl} target="_blank" rel="noreferrer">
+                      <img
+                        src={u.ghanaCardFrontUrl}
+                        alt="Front Side"
+                        className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                      />
+                    </a>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Back View</p>
+                    <a href={u.ghanaCardBackUrl} target="_blank" rel="noreferrer">
+                      <img
+                        src={u.ghanaCardBackUrl}
+                        alt="Back Side"
+                        className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                      />
+                    </a>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">Click images to view full size</p>
               </CardContent>
               <CardFooter className="border-t pt-4 bg-gray-50/50 flex gap-3">
                 <Button

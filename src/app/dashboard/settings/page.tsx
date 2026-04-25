@@ -14,7 +14,8 @@ import { toast } from "sonner";
 export default function SettingsPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   
@@ -58,35 +59,53 @@ export default function SettingsPage() {
     }
   };
 
+  const uploadFile = async (file: File, suffix: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user!.id}-${suffix}-${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('verifications')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('verifications').getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
   const handleUpload = async () => {
-    if (!file || !user) return;
+    if (!frontFile || !backFile || !user) {
+      toast.error("Both sides required", {
+        description: "Please select both the front and back images of your card.",
+      });
+      return;
+    }
+    
     setUploading(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('verifications')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('verifications').getPublicUrl(filePath);
+      const frontUrl = await uploadFile(frontFile, 'front');
+      const backUrl = await uploadFile(backFile, 'back');
 
       const res = await fetch('/api/user/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ supabaseUserId: user.id, ghanaCardUrl: data.publicUrl })
+        body: JSON.stringify({ 
+          supabaseUserId: user.id, 
+          ghanaCardFrontUrl: frontUrl,
+          ghanaCardBackUrl: backUrl
+        })
       });
 
       if (res.ok) {
+        const data = await res.json();
         toast.success("Ghana Card uploaded!", {
-          description: "Your document is now awaiting admin approval.",
+          description: "Both sides have been received and are awaiting admin approval.",
         });
-        setProfile({ ...profile, ghanaCardUrl: data.publicUrl });
-        setFile(null);
+        setProfile(data.user);
+        setFrontFile(null);
+        setBackFile(null);
       } else {
         throw new Error("Failed to update profile.");
       }
@@ -104,6 +123,8 @@ export default function SettingsPage() {
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
     </div>
   );
+
+  const hasSubmitted = profile.ghanaCardFrontUrl && profile.ghanaCardBackUrl;
 
   return (
     <div className="max-w-3xl space-y-8 pb-10">
@@ -182,52 +203,78 @@ export default function SettingsPage() {
           <CardDescription>
             {profile.isVerified 
               ? "Your identity has been successfully verified by a RentGuard admin."
-              : "Upload your Ghana Card to verify your identity. This is required for safety."}
+              : "Upload the front and back of your Ghana Card for verification."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-xl border">
             {profile.isVerified ? (
               <><ShieldCheck className="w-10 h-10 text-green-500" /> <div><h4 className="font-bold text-gray-900 text-lg">Verified User</h4><p className="text-sm text-gray-500">You have full access to RentGuard features.</p></div></>
-            ) : profile.ghanaCardUrl ? (
-               <><ShieldAlert className="w-10 h-10 text-yellow-500" /> <div><h4 className="font-bold text-gray-900 text-lg">Verification Pending</h4><p className="text-sm text-gray-500">Your card is under review by our administrators.</p></div></>
+            ) : hasSubmitted ? (
+               <><ShieldAlert className="w-10 h-10 text-yellow-500" /> <div><h4 className="font-bold text-gray-900 text-lg">Verification Pending</h4><p className="text-sm text-gray-500">Your documents are under review by our administrators.</p></div></>
             ) : (
                <><ShieldAlert className="w-10 h-10 text-red-500" /> <div><h4 className="font-bold text-gray-900 text-lg">Unverified Access</h4><p className="text-sm text-gray-500">Please upload your Ghana Card to lift account restrictions.</p></div></>
             )}
           </div>
 
-          {!profile.isVerified && !profile.ghanaCardUrl && (
-            <div className="space-y-4">
+          {!profile.isVerified && !hasSubmitted && (
+            <div className="space-y-6">
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg flex gap-3 text-yellow-800 text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />
-                <p><strong>Admin Setup Required:</strong> To test this feature locally, you must create a public bucket named exactly <code>verifications</code> in your Supabase Storage dashboard.</p>
+                <p><strong>Admin Setup Required:</strong> Ensure you have a public bucket named <code>verifications</code> in Supabase.</p>
               </div>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors bg-white">
-                <input
-                  type="file"
-                  id="document"
-                  className="hidden"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-                <label htmlFor="document" className="cursor-pointer flex flex-col items-center">
-                  <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <UploadCloud className="w-7 h-7 text-primary" />
+              <div className="grid gap-6 sm:grid-cols-2">
+                {/* Front Side */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Front View</Label>
+                  <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors bg-white ${frontFile ? 'border-primary bg-primary/5' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <input
+                      type="file"
+                      id="front-doc"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => setFrontFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="front-doc" className="cursor-pointer flex flex-col items-center">
+                      <UploadCloud className={`w-8 h-8 mb-2 ${frontFile ? 'text-primary' : 'text-gray-400'}`} />
+                      <span className="text-sm font-semibold text-gray-900">{frontFile ? 'File selected' : 'Upload Front'}</span>
+                      {frontFile && <span className="text-[10px] text-primary truncate max-w-full px-2 mt-1">{frontFile.name}</span>}
+                    </label>
                   </div>
-                  <span className="font-bold text-gray-900 text-lg">Click to select file</span>
-                  <span className="text-sm text-gray-500 mt-1">PNG, JPG, or PDF (Max 5MB)</span>
-                </label>
+                </div>
+
+                {/* Back Side */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Back View</Label>
+                  <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors bg-white ${backFile ? 'border-primary bg-primary/5' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <input
+                      type="file"
+                      id="back-doc"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => setBackFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="back-doc" className="cursor-pointer flex flex-col items-center">
+                      <UploadCloud className={`w-8 h-8 mb-2 ${backFile ? 'text-primary' : 'text-gray-400'}`} />
+                      <span className="text-sm font-semibold text-gray-900">{backFile ? 'File selected' : 'Upload Back'}</span>
+                      {backFile && <span className="text-[10px] text-primary truncate max-w-full px-2 mt-1">{backFile.name}</span>}
+                    </label>
+                  </div>
+                </div>
               </div>
               
-              {file && (
-                <div className="flex justify-between items-center bg-blue-50 text-blue-900 p-4 rounded-xl border border-blue-100 font-medium text-sm shadow-sm">
-                  <span className="truncate mr-4">{file.name}</span>
-                  <Button onClick={handleUpload} disabled={uploading} className="shadow-md">
-                    {uploading ? "Uploading..." : "Submit Securely"}
-                  </Button>
-                </div>
-              )}
+              <Button 
+                onClick={handleUpload} 
+                disabled={uploading || !frontFile || !backFile} 
+                className="w-full h-12 text-lg font-bold shadow-md"
+              >
+                {uploading ? (
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Uploading Documents...</>
+                ) : (
+                  "Submit Both Sides for Verification"
+                )}
+              </Button>
             </div>
           )}
         </CardContent>

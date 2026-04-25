@@ -6,27 +6,51 @@ export async function syncUserToDatabase(
   supabaseUserId: string,
   email: string,
   name: string,
-  role: "LANDLORD" | "TENANT" = "TENANT"
+  role: "LANDLORD" | "TENANT" | "ADMIN" = "TENANT"
 ) {
   try {
-    const existingUser = await prisma.user.findUnique({
+    // 1. Try finding by Supabase ID (the primary way we link)
+    const existingBySupabaseId = await prisma.user.findUnique({
       where: { supabaseUserId },
     });
 
-    if (!existingUser) {
-      await prisma.user.create({
-        data: {
-          supabaseUserId,
-          email,
-          name,
-          role,
-        },
-      });
+    if (existingBySupabaseId) {
+      console.log(`User found by Supabase ID: ${supabaseUserId}`);
+      return { success: true };
     }
+
+    console.log(`Profile not found for ID: ${supabaseUserId}. Checking email: ${email}`);
+
+    // 2. Fallback: Check if they exist by email (in case of account recreation or ID mismatch)
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingByEmail) {
+      console.log(`Found existing profile by email. Updating Supabase ID from ${existingByEmail.supabaseUserId} to ${supabaseUserId}`);
+      // Re-link the existing record to the new Supabase ID
+      await prisma.user.update({
+        where: { email },
+        data: { supabaseUserId },
+      });
+      return { success: true };
+    }
+
+    console.log(`No profile found for email ${email}. Creating new record.`);
+
+    // 3. Create new user if no record exists at all
+    await prisma.user.create({
+      data: {
+        supabaseUserId,
+        email,
+        name,
+        role,
+      },
+    });
+    console.log(`New user created: ${email}`);
     return { success: true };
   } catch (error: any) {
     console.error("Error syncing user to database:", error);
-    // Safely serialize the error so it doesn't crash the Next.js server action boundary
     const errorMsg = error instanceof Error ? error.message : String(error);
     return { success: false, error: errorMsg };
   }

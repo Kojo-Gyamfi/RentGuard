@@ -1,4 +1,5 @@
 "use server";
+// Stale type fix
 
 import { prisma } from "@/lib/prisma";
 
@@ -10,7 +11,15 @@ export async function getAdminStats() {
         prisma.property.count(),
         prisma.application.count(),
         prisma.agreement.count(),
-        prisma.user.count({ where: { ghanaCardUrl: { not: null }, isVerified: false } }),
+        prisma.user.count({ 
+          where: { 
+            OR: [
+              { ghanaCardFrontUrl: { not: null } },
+              { ghanaCardBackUrl: { not: null } }
+            ],
+            isVerified: false 
+          } 
+        }),
       ]);
 
     return {
@@ -25,8 +34,14 @@ export async function getAdminStats() {
 export async function getPendingVerifications() {
   try {
     const users = await prisma.user.findMany({
-      where: { ghanaCardUrl: { not: null }, isVerified: false },
-      select: { id: true, name: true, email: true, ghanaCardUrl: true, role: true, createdAt: true },
+      where: { 
+        OR: [
+          { ghanaCardFrontUrl: { not: null } },
+          { ghanaCardBackUrl: { not: null } }
+        ],
+        isVerified: false 
+      },
+      select: { id: true, name: true, email: true, phone: true, ghanaCardFrontUrl: true, ghanaCardBackUrl: true, role: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     });
     return { success: true, users };
