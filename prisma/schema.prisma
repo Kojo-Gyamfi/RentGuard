@@ -54,18 +54,19 @@ model Application {
 }
 
 model Agreement {
-  id         String    @id @default(uuid())
+  id         String          @id @default(uuid())
   propertyId String
   tenantId   String
   landlordId String
   startDate  DateTime
   endDate    DateTime
   rentAmount Float
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  landlord   User      @relation("LandlordAgreements", fields: [landlordId], references: [id])
-  property   Property  @relation(fields: [propertyId], references: [id])
-  tenant     User      @relation("TenantAgreements", fields: [tenantId], references: [id])
+  status     AgreementStatus @default(PENDING_PAYMENT)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  landlord   User            @relation("LandlordAgreements", fields: [landlordId], references: [id])
+  property   Property        @relation(fields: [propertyId], references: [id])
+  tenant     User            @relation("TenantAgreements", fields: [tenantId], references: [id])
   payments   Payment[]
 }
 
@@ -75,6 +76,7 @@ model Payment {
   tenantId    String
   amount      Float
   status      PaymentStatus @default(PENDING)
+  purpose     String?
   dueDate     DateTime
   paidDate    DateTime?
   reference   String?
@@ -98,8 +100,16 @@ enum PropertyStatus {
 
 enum ApplicationStatus {
   PENDING
+  OFFERED
   APPROVED
   REJECTED
+}
+
+enum AgreementStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  TERMINATED
+  EXPIRED
 }
 
 enum PaymentStatus {

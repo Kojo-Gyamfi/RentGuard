@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getLandlordApplications, getTenantApplications, updateApplicationStatus, cancelApplication } from "@/app/actions/application";
+import { getLandlordApplications, getTenantApplications, updateApplicationStatus, cancelApplication, acceptOffer } from "@/app/actions/application";
 import { getUserProfile } from "@/app/actions/user";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -59,22 +59,22 @@ export default function ApplicationsPage() {
         ? "Approve this application?"
         : "Reject this application?",
       {
-        description: status === "APPROVED"
-          ? "This will generate a 1-year rental agreement and set the property to RENTED."
+        description: status === "APPROVED" || (status as any) === "OFFERED"
+          ? "This will send a formal offer to the tenant for their review."
           : "The tenant will be notified that their application was declined.",
         duration: Infinity,
         action: {
-          label: status === "APPROVED" ? "Yes, Approve" : "Yes, Reject",
+          label: status === "APPROVED" || (status as any) === "OFFERED" ? "Yes, Send Offer" : "Yes, Reject",
           onClick: async () => {
             setProcessingId(id);
-            const res = await updateApplicationStatus(id, status, user.id);
+            const res = await updateApplicationStatus(id, status === "APPROVED" ? "OFFERED" : "REJECTED", user.id);
             if (res.success) {
               setApplications(apps => apps.map(app => app.id === id ? { ...app, status } : app));
               toast.success(
-                status === "APPROVED" ? "Application approved!" : "Application rejected",
+                status === "APPROVED" || (status as any) === "OFFERED" ? "Offer sent!" : "Application rejected",
                 {
-                  description: status === "APPROVED"
-                    ? "A rental agreement has been generated and the tenant has been notified."
+                  description: status === "APPROVED" || (status as any) === "OFFERED"
+                    ? "The tenant has been notified to review the offer."
                     : "The tenant has been notified about this decision.",
                 }
               );
@@ -129,6 +129,8 @@ export default function ApplicationsPage() {
     switch (status) {
       case "APPROVED":
         return { color: "bg-green-50 text-green-700 border-green-200", icon: CheckCircle, iconColor: "text-green-500" };
+      case "OFFERED":
+        return { color: "bg-blue-50 text-blue-700 border-blue-200", icon: Clock, iconColor: "text-blue-500" };
       case "REJECTED":
         return { color: "bg-red-50 text-red-700 border-red-200", icon: XCircle, iconColor: "text-red-500" };
       default:
@@ -224,6 +226,46 @@ export default function ApplicationsPage() {
                       <Calendar className="w-3 h-3 mr-1" />
                       Applied on {new Date(app.createdAt).toLocaleDateString()}
                     </div>
+
+                    {app.status === "OFFERED" && (
+                      <div className="mt-4 pt-4 border-t space-y-2">
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold flex items-center justify-center gap-2 shadow-sm"
+                          onClick={async () => {
+                            if (!user) return;
+                            setProcessingId(app.id);
+                            const res = await acceptOffer(app.id, user.id);
+                            if (res.success) {
+                              toast.success("Offer accepted!", {
+                                description: "Your lease agreement has been generated. Please proceed to make the initial payment.",
+                              });
+                              loadApplications("TENANT");
+                            } else {
+                              toast.error("Failed to accept offer", { description: res.error });
+                            }
+                            setProcessingId(null);
+                          }}
+                          disabled={processingId === app.id}
+                        >
+                          {processingId === app.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                          Accept Offer
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors font-semibold flex items-center justify-center gap-1"
+                          onClick={() => handleCancel(app.id)}
+                          disabled={processingId === app.id}
+                        >
+                          {processingId === app.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
+                          Decline & Withdraw
+                        </Button>
+                      </div>
+                    )}
 
                     {app.status === "PENDING" && (
                       <div className="mt-4 pt-4 border-t">
@@ -338,7 +380,7 @@ export default function ApplicationsPage() {
                       onClick={() => handleUpdate(app.id, "APPROVED")}
                       disabled={processingId === app.id}
                     >
-                      {processingId === app.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Approve"}
+                      {processingId === app.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Offer"}
                     </Button>
                   </CardFooter>
                 )}

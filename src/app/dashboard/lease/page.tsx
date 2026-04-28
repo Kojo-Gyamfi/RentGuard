@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getAgreements } from "@/app/actions/agreement";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FileText, Calendar, DollarSign, Home } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function TenantLeasePage() {
   const { user } = useAuth();
@@ -73,8 +74,13 @@ export default function TenantLeasePage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-800">
-                      ACTIVE
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-1 rounded text-[10px] font-black uppercase tracking-tight",
+                      agreement.status === "ACTIVE" 
+                        ? "bg-green-100 text-green-800 border border-green-200" 
+                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                    )}>
+                      {agreement.status === "ACTIVE" ? "ACTIVE" : "PENDING PAYMENT"}
                     </span>
                   </div>
                 </div>
