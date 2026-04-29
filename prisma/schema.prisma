@@ -23,6 +23,7 @@ model User {
   applications       Application[]
   payments           Payment[]
   properties         Property[]
+  notifications      Notification[]
 }
 
 model Property {
@@ -86,6 +87,17 @@ model Payment {
   tenant      User          @relation(fields: [tenantId], references: [id])
 }
 
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+}
+
 enum Role {
   ADMIN
   LANDLORD
@@ -116,4 +128,11 @@ enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
 }

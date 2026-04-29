@@ -1,20 +1,34 @@
+import { prisma } from "@/lib/prisma";
+import { NotificationType } from "@prisma/client";
+
 export async function sendNotification(
   userId: string, 
   title: string, 
   message: string, 
-  type: "EMAIL" | "SMS"
+  type: "EMAIL" | "SMS" = "EMAIL" // Keep for compatibility with existing calls
 ) {
-  // In a real production application, this would integrate with Resend, Sendgrid, or Twilio.
-  // For the purpose of this project, we console.log the notification to simulate it.
-  
-  console.log(`[NOTIFICATION SYSTEM - ${type}]`);
-  console.log(`To User ID: ${userId}`);
-  console.log(`Title: ${title}`);
-  console.log(`Message: ${message}`);
-  console.log(`--------------------------------------------------`);
+  try {
+    // 1. Create the in-app notification in the database
+    // We map generic email/sms types to an INFO notification type for the UI
+    await prisma.notification.create({
+      data: {
+        userId,
+        title,
+        message,
+        type: "INFO", 
+      }
+    });
 
-  // Simulate a network delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+    // 2. In a real production application, you would ALSO integrate with Resend, Sendgrid, or Twilio here.
+    console.log(`[NOTIFICATION SYSTEM - ${type}]`);
+    console.log(`To User ID: ${userId}`);
+    console.log(`Title: ${title}`);
+    console.log(`Message: ${message}`);
+    console.log(`--------------------------------------------------`);
 
-  return { success: true };
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send notification:", error);
+    return { success: false, error };
+  }
 }

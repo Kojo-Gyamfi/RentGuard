@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getUserProfile, syncUserToDatabase } from "@/app/actions/user";
 import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -75,7 +76,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
       <Sidebar role={role} />
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header role={role} />
+        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      </div>
     </div>
   );
 }

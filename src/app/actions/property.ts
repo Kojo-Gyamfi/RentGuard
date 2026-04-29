@@ -142,6 +142,9 @@ export async function applyForProperty(propertyId: string, message: string, supa
     const user = await prisma.user.findUnique({ where: { supabaseUserId } });
     if (!user || user.role !== "TENANT") throw new Error("Only tenants can apply.");
 
+    const property = await prisma.property.findUnique({ where: { id: propertyId } });
+    if (!property) throw new Error("Property not found.");
+
     const existing = await prisma.application.findFirst({
       where: { propertyId, tenantId: user.id },
     });
@@ -156,8 +159,18 @@ export async function applyForProperty(propertyId: string, message: string, supa
       },
     });
 
+    // Notify the landlord
+    const { sendNotification } = await import("@/lib/notifications");
+    await sendNotification(
+      property.landlordId,
+      "New Property Application",
+      `${user.name} has submitted an application for ${property.title}.`,
+      "EMAIL"
+    );
+
     return { success: true, application };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
