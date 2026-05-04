@@ -6,13 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDashboardStats } from "@/app/actions/dashboard";
 import { getUserProfile } from "@/app/actions/user";
 import { getAdminStats } from "@/app/actions/admin";
-import { Loader2, Home, Users, FileClock, FileText, DollarSign, Folder, ShieldCheck, Clock } from "lucide-react";
+import { Loader2, Home, Users, FileClock, FileText, DollarSign, Folder, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+interface DashboardStats {
+  totalProperties?: number;
+  activeTenants?: number;
+  pendingApplications?: number;
+  totalApplications?: number;
+  activeLeases?: number;
+  pendingPayments?: number;
+  totalUsers?: number;
+  pendingVerifications?: number;
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +41,7 @@ export default function DashboardPage() {
             statsRes = await getDashboardStats(user.id);
           }
           
-          if (statsRes.success) setStats(statsRes.stats);
+          if (statsRes.success && statsRes.stats) setStats(statsRes.stats);
         }
         setLoading(false);
       });

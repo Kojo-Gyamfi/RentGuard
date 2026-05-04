@@ -4,29 +4,41 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/app/actions/notification";
 import { Bell, Check, Info, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCallback } from "react";
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: Date | string;
+}
 
 export default function Header({ role }: { role: string }) {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
     const res = await getUserNotifications(user.id);
     if (res.success) {
-      setNotifications(res.notifications || []);
+      setNotifications(res.notifications as Notification[] || []);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    fetchNotifications();
+    const timeout = setTimeout(fetchNotifications, 0);
     // Simple polling every 30 seconds for new notifications
     const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [user]);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [fetchNotifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -109,7 +121,7 @@ export default function Header({ role }: { role: string }) {
                 {notifications.length === 0 ? (
                   <div className="p-6 text-center text-sm text-slate-500">
                     <Bell className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                    You're all caught up!
+                    You&apos;re all caught up!
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">

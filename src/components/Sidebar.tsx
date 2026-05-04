@@ -17,7 +17,7 @@ export default function Sidebar({ role }: SidebarProps) {
     try {
       await signOut();
       toast.success("Successfully logged out.");
-    } catch (error) {
+    } catch {
       toast.error("An error occurred while logging out.");
     }
   };

@@ -8,10 +8,20 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, MapPin, Home, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
+
+interface Property {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  images: string[];
+  status: string;
+}
 
 export default function PropertiesPage() {
   const { user } = useAuth();
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -92,7 +102,7 @@ export default function PropertiesPage() {
           {properties.map((prop) => (
             <Card key={prop.id} className="overflow-hidden shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 bg-white border-gray-200">
               <div className="h-52 w-full bg-gray-100 relative">
-                <img src={prop.images[0]} alt={prop.title} className="w-full h-full object-cover" />
+                <Image src={prop.images[0]} alt={prop.title} fill className="object-cover" />
                 <div className="absolute top-3 right-3 px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full text-xs font-bold shadow-sm">
                   {prop.status}
                 </div>

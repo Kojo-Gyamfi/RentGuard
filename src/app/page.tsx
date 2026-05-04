@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Home, Search, ShieldCheck, FileText, CreditCard, Bell } from "lucide-react";
 
 const features = [
@@ -43,12 +41,6 @@ const features = [
     desc: "Automated cron jobs ensure neither party forgets an upcoming or overdue rent schedule.",
     color: "bg-purple-100",
   },
-];
-
-const stats = [
-  { value: "500+", label: "Verified Listings" },
-  { value: "1.2k+", label: "Happy Tenants" },
-  { value: "100%", label: "Digital Workflow" },
 ];
 
 export default function LandingPage() {

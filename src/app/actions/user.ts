@@ -49,7 +49,7 @@ export async function syncUserToDatabase(
     });
     console.log(`New user created: ${email}`);
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error syncing user to database:", error);
     const errorMsg = error instanceof Error ? error.message : String(error);
     return { success: false, error: errorMsg };
@@ -67,9 +67,10 @@ export async function getUserProfile(supabaseUserId: string) {
     }
 
     return { success: true, user: JSON.parse(JSON.stringify(user)) };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching user profile:", error);
-    return { success: false, error: error.message || "Failed to fetch user profile." };
+    const message = error instanceof Error ? error.message : "Failed to fetch user profile.";
+    return { success: false, error: message };
   }
 }
 
@@ -83,8 +84,9 @@ export async function updateUserProfile(
       data,
     });
     return { success: true, user: JSON.parse(JSON.stringify(updated)) };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating user profile:", error);
-    return { success: false, error: error.message || "Failed to update profile." };
+    const message = error instanceof Error ? error.message : "Failed to update profile.";
+    return { success: false, error: message };
   }
 }

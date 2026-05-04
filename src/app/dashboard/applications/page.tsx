@@ -11,13 +11,56 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { User, Mail, Phone, Calendar, Home, MapPin, Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
+import { useCallback } from "react";
+
+interface Application {
+  id: string;
+  status: string;
+  createdAt: string | Date;
+  message?: string | null;
+  property: {
+    title: string;
+    price: number;
+    location?: string;
+    images?: string[];
+    landlord?: {
+      name: string;
+      email: string;
+      phone?: string | null;
+    };
+  };
+  tenant?: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+}
 
 export default function ApplicationsPage() {
   const { user } = useAuth();
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const loadApplications = useCallback(async (userRole: string) => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      if (userRole === "LANDLORD") {
+        const res = await getLandlordApplications(user.id);
+        if (res.success) setApplications(res.applications ?? []);
+      } else if (userRole === "TENANT") {
+        const res = await getTenantApplications(user.id);
+        if (res.success) setApplications(res.applications ?? []);
+      }
+    } catch {
+      toast.error("Failed to load applications");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -30,50 +73,33 @@ export default function ApplicationsPage() {
         }
       });
     }
-  }, [user]);
-
-  const loadApplications = async (userRole: string) => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      if (userRole === "LANDLORD") {
-        const res = await getLandlordApplications(user.id);
-        if (res.success) setApplications(res.applications || []);
-      } else if (userRole === "TENANT") {
-        const res = await getTenantApplications(user.id);
-        if (res.success) setApplications(res.applications || []);
-      }
-    } catch (error) {
-      toast.error("Failed to load applications");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, loadApplications]);
 
   const handleUpdate = async (id: string, status: "APPROVED" | "REJECTED") => {
     if (!user) return;
     
-    const action = status === "APPROVED" ? "approve" : "reject";
-    const confirmToast = toast(
+    const nextStatus = status === "APPROVED" ? "OFFERED" : "REJECTED";
+
+    toast(
       status === "APPROVED"
         ? "Approve this application?"
         : "Reject this application?",
       {
-        description: status === "APPROVED" || (status as any) === "OFFERED"
+        description: nextStatus === "OFFERED"
           ? "This will send a formal offer to the tenant for their review."
           : "The tenant will be notified that their application was declined.",
         duration: Infinity,
         action: {
-          label: status === "APPROVED" || (status as any) === "OFFERED" ? "Yes, Send Offer" : "Yes, Reject",
+          label: nextStatus === "OFFERED" ? "Yes, Send Offer" : "Yes, Reject",
           onClick: async () => {
             setProcessingId(id);
-            const res = await updateApplicationStatus(id, status === "APPROVED" ? "OFFERED" : "REJECTED", user.id);
+            const res = await updateApplicationStatus(id, nextStatus, user.id);
             if (res.success) {
-              setApplications(apps => apps.map(app => app.id === id ? { ...app, status } : app));
+              setApplications(apps => apps.map(app => app.id === id ? { ...app, status: nextStatus } : app));
               toast.success(
-                status === "APPROVED" || (status as any) === "OFFERED" ? "Offer sent!" : "Application rejected",
+                nextStatus === "OFFERED" ? "Offer sent!" : "Application rejected",
                 {
-                  description: status === "APPROVED" || (status as any) === "OFFERED"
+                  description: nextStatus === "OFFERED"
                     ? "The tenant has been notified to review the offer."
                     : "The tenant has been notified about this decision.",
                 }
@@ -157,7 +183,7 @@ export default function ApplicationsPage() {
           <div className="text-center py-16 bg-white rounded-lg border border-dashed border-gray-300">
             <Home className="mx-auto h-12 w-12 text-gray-300 mb-4" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">No applications yet</h3>
-            <p className="text-muted-foreground mb-4">You haven't applied to any properties yet.</p>
+            <p className="text-muted-foreground mb-4">You haven&apos;t applied to any properties yet.</p>
             <Link href="/dashboard/properties/browse" className={cn(buttonVariants({ variant: "default" }), "mt-4")}>
               Browse Properties
             </Link>
@@ -172,7 +198,7 @@ export default function ApplicationsPage() {
                   {/* Property Image */}
                   {app.property?.images?.[0] && (
                     <div className="h-40 w-full bg-gray-100 relative">
-                      <img src={app.property.images[0]} alt={app.property.title} className="w-full h-full object-cover" />
+                      <Image src={app.property.images[0]} alt={app.property.title} fill className="object-cover" />
                       <div className="absolute top-3 right-3">
                         <Badge className={`${statusConfig.color} border font-bold text-xs shadow-sm flex items-center gap-1`}>
                           <StatusIcon className={`w-3 h-3 ${statusConfig.iconColor}`} />
@@ -218,7 +244,7 @@ export default function ApplicationsPage() {
                     {app.message && (
                       <div className="mt-3 pt-3 border-t">
                         <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Your Message</p>
-                        <p className="text-sm text-gray-600 italic line-clamp-2">"{app.message}"</p>
+                        <p className="text-sm text-gray-600 italic line-clamp-2">&quot;{app.message}&quot;</p>
                       </div>
                     )}
 
@@ -339,15 +365,15 @@ export default function ApplicationsPage() {
                   <div className="space-y-3">
                     <div className="flex items-center text-sm">
                       <User className="w-4 h-4 text-gray-400 mr-2" />
-                      <span className="font-medium text-gray-900">{app.tenant.name}</span>
+                      <span className="font-medium text-gray-900">{app.tenant?.name}</span>
                     </div>
                     <div className="flex items-center text-sm">
                       <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                      <a href={`mailto:${app.tenant.email}`} className="text-gray-600 hover:text-primary transition-colors">
-                        {app.tenant.email}
+                      <a href={`mailto:${app.tenant?.email ?? ""}`} className="text-gray-600 hover:text-primary transition-colors">
+                        {app.tenant?.email}
                       </a>
                     </div>
-                    {app.tenant.phone && (
+                    {app.tenant?.phone && (
                       <div className="flex items-center text-sm">
                         <Phone className="w-4 h-4 text-gray-400 mr-2" />
                         <a href={`tel:${app.tenant.phone}`} className="text-gray-600 hover:text-primary transition-colors">
@@ -359,7 +385,7 @@ export default function ApplicationsPage() {
                     <div className="mt-4 pt-3 border-t">
                       <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Applicant Message</p>
                       <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded italic border">
-                        "{app.message || 'No additional message.'}"
+                        &quot;{app.message || 'No additional message.'}&quot;
                       </p>
                     </div>
                   </div>

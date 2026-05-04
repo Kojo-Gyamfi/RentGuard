@@ -2,16 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { getAdminStats } from "@/app/actions/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Users, Home, FileText, ShieldCheck, Clock } from "lucide-react";
 
+interface AdminStats {
+  totalUsers: number;
+  totalProperties: number;
+  totalApplications: number;
+  totalAgreements: number;
+  pendingVerifications: number;
+}
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAdminStats().then((res) => {
-      if (res.success) setStats(res.stats);
+      if (res.success && res.stats) setStats(res.stats);
       setLoading(false);
     });
   }, []);

@@ -5,8 +5,21 @@ import { getAllUsers } from "@/app/actions/admin";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck } from "lucide-react";
 
+interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: string | Date;
+  _count?: {
+    properties: number;
+    applications: number;
+  };
+}
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -60,8 +60,9 @@ export async function getDashboardStats(supabaseUserId: string) {
     }
 
     return { success: true, stats: {} };
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     console.error("Dashboard stats error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }

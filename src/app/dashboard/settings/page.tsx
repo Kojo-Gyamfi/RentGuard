@@ -11,9 +11,20 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck, ShieldAlert, UploadCloud, AlertCircle, User, Phone, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  isVerified: boolean;
+  ghanaCardFrontUrl?: string;
+  ghanaCardBackUrl?: string;
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -50,9 +61,10 @@ export default function SettingsPage() {
       } else {
         throw new Error(res.error || "Failed to update profile.");
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Update failed";
       toast.error("Update failed", {
-        description: error.message,
+        description: message,
       });
     } finally {
       setSaving(false);
@@ -109,9 +121,10 @@ export default function SettingsPage() {
       } else {
         throw new Error("Failed to update profile.");
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload failed";
       toast.error("Upload failed", {
-        description: `${error.message}. Ensure you have a public bucket named 'verifications' in Supabase Storage.`,
+        description: `${message}. Ensure you have a public bucket named 'verifications' in Supabase Storage.`,
       });
     } finally {
       setUploading(false);

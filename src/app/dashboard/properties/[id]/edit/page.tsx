@@ -6,16 +6,25 @@ import { getPropertyById } from "@/app/actions/property";
 import PropertyForm from "@/components/PropertyForm";
 import { Loader2 } from "lucide-react";
 
+interface EditableProperty {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  price: number;
+  images: string[];
+}
+
 export default function EditPropertyPage() {
   const params = useParams();
   const router = useRouter();
-  const [property, setProperty] = useState<any>(null);
+  const [property, setProperty] = useState<EditableProperty | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
       getPropertyById(params.id as string).then((res) => {
-        if (res.success) {
+        if (res.success && res.property) {
           setProperty(res.property);
         } else {
           console.error(res.error);
@@ -24,7 +33,7 @@ export default function EditPropertyPage() {
         setLoading(false);
       });
     }
-  }, [params.id]);
+  }, [params.id, router]);
 
   if (loading) {
     return (

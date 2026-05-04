@@ -9,10 +9,24 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/Textarea";
 import { MapPin, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
+
+interface Property {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  price: number;
+  images: string[];
+  landlord: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function BrowsePropertiesPage() {
   const { user } = useAuth();
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [applyingTo, setApplyingTo] = useState<string | null>(null);
@@ -51,9 +65,10 @@ export default function BrowsePropertiesPage() {
           description: res.error || "Could not submit your application. Please try again.",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.";
       toast.error("Something went wrong", {
-        description: "An unexpected error occurred. Please try again later.",
+        description: errorMsg,
       });
     } finally {
       setSubmitting(false);
@@ -84,7 +99,7 @@ export default function BrowsePropertiesPage() {
       ) : properties.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-lg border border-dashed border-gray-300">
           <h3 className="text-xl font-bold text-gray-800 mb-2">No properties found</h3>
-          <p className="text-muted-foreground">We couldn't find any available properties matching your criteria.</p>
+          <p className="text-muted-foreground">We couldn&apos;t find any available properties matching your criteria.</p>
           {search && (
             <Button variant="link" onClick={() => { setSearch(""); loadProperties(); }} className="mt-4 text-primary">
               Clear filters and show all
@@ -96,7 +111,7 @@ export default function BrowsePropertiesPage() {
           {properties.map((prop) => (
             <Card key={prop.id} className="overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border-gray-200 bg-white flex flex-col">
               <div className="h-56 w-full bg-gray-100 relative group">
-                <img src={prop.images[0]} alt={prop.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <Image src={prop.images[0]} alt={prop.title} fill className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm text-gray-900 px-3 py-1.5 text-sm font-black rounded-full shadow-md">
                   GH₵ {prop.price.toLocaleString()} <span className="text-gray-500 text-xs font-medium">/mo</span>
                 </div>

@@ -26,8 +26,9 @@ export async function getAdminStats() {
       success: true,
       stats: { totalUsers, totalProperties, totalApplications, totalAgreements, pendingVerifications },
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
@@ -45,8 +46,9 @@ export async function getPendingVerifications() {
       orderBy: { createdAt: "desc" },
     });
     return { success: true, users };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
@@ -57,8 +59,9 @@ export async function approveVerification(userId: string) {
       data: { isVerified: true },
     });
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
@@ -73,7 +76,8 @@ export async function getAllUsers() {
       },
     });
     return { success: true, users };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }

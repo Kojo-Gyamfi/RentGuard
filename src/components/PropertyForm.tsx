@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { createProperty, updateProperty } from "@/app/actions/property";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,8 +14,17 @@ import { ImagePlus, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
+interface PropertyData {
+  id?: string;
+  title: string;
+  description: string;
+  location: string;
+  price: number | string;
+  images: string[];
+}
+
 interface PropertyFormProps {
-  initialData?: any;
+  initialData?: PropertyData;
   isEditing?: boolean;
 }
 
@@ -116,9 +126,10 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
       } else {
         throw new Error(res.error || `Failed to ${isEditing ? 'update' : 'create'} property.`);
       }
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An unknown error occurred";
       toast.error("Operation failed", {
-        description: err.message,
+        description: message,
       });
       setLoading(false);
       setUploading(false);
@@ -198,7 +209,7 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
               {/* Existing Images */}
               {formData.images.map((url: string, index: number) => (
                 <div key={`existing-${index}`} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-slate-100 bg-slate-50 shadow-sm transition-all hover:border-primary/30">
-                  <img src={url} alt={`Existing ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image src={url} alt={`Existing ${index + 1}`} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <button
                     type="button"
                     onClick={() => removeExistingImage(index)}
@@ -212,7 +223,7 @@ export default function PropertyForm({ initialData, isEditing = false }: Propert
               {/* New Previews */}
               {previews.map((url: string, index: number) => (
                 <div key={`new-${index}`} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-primary/20 bg-primary/5 shadow-sm transition-all hover:border-primary/40">
-                  <img src={url} alt={`New Preview ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
+                  <Image src={url} alt={`New Preview ${index + 1}`} fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
                   <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors" />
                   <button
                     type="button"

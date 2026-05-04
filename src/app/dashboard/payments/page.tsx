@@ -14,11 +14,39 @@ import { DollarSign, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { getUserProfile } from "@/app/actions/user";
 
+interface Payment {
+  id: string;
+  createdAt: string | Date;
+  amount: number;
+  reference: string | null;
+  purpose?: string | null;
+  status: string;
+  agreement: {
+    property: {
+      title: string;
+    };
+    tenant: {
+      name: string;
+    };
+    landlord: {
+      name: string;
+    };
+  };
+}
+
+interface Agreement {
+  id: string;
+  property: {
+    title: string;
+  };
+  rentAmount: number;
+}
+
 export default function PaymentsPage() {
   const { user } = useAuth();
   const [role, setRole] = useState<"LANDLORD" | "TENANT" | "ADMIN" | null>(null);
-  const [payments, setPayments] = useState<any[]>([]);
-  const [agreements, setAgreements] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form state
@@ -34,21 +62,24 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     if (user) {
-      getUserProfile(user.id).then(res => {
+      getUserProfile(user.id).then(async res => {
         if (res.success && res.user) {
            setRole(res.user.role);
-           
-           Promise.all([
-             (res.user.role === "LANDLORD" || res.user.role === "TENANT") ? getPayments(user.id, res.user.role as "LANDLORD" | "TENANT") : Promise.resolve({ success: false, payments: [] as any[] }),
-             res.user.role === "TENANT" ? getAgreements(user.id, "TENANT") : Promise.resolve({ success: false, agreements: [] as any[] })
-           ]).then(([payRes, agRes]) => {
+
+           if (res.user.role === "LANDLORD" || res.user.role === "TENANT") {
+             const payRes = await getPayments(user.id, res.user.role);
              if (payRes.success) setPayments(payRes.payments || []);
+           }
+
+           if (res.user.role === "TENANT") {
+             const agRes = await getAgreements(user.id, "TENANT");
              if (agRes.success && agRes.agreements) {
                 setAgreements(agRes.agreements);
                 if (agRes.agreements.length > 0) setSelectedAgreement(agRes.agreements[0].id);
              }
-             setLoading(false);
-           });
+           }
+
+           setLoading(false);
         }
       });
     }
@@ -107,6 +138,12 @@ export default function PaymentsPage() {
     setVerifyingId(null);
   };
 
+  const handlePurposeTypeChange = (value: string) => {
+    if (value === "MONTHLY" || value === "YEARLY" || value === "DEPOSIT" || value === "OTHER") {
+      setPurposeType(value);
+    }
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-48">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -126,7 +163,7 @@ export default function PaymentsPage() {
           <Card className="lg:col-span-1 shadow-sm border-gray-200 h-fit">
             <CardHeader className="bg-slate-50 border-b pb-4">
               <CardTitle className="text-lg flex items-center"><DollarSign className="w-5 h-5 mr-2" /> Log New Payment</CardTitle>
-              <CardDescription>Record a rent payment you've made.</CardDescription>
+              <CardDescription>Record a rent payment you&apos;ve made.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <form onSubmit={handleLogPayment} className="space-y-4">
@@ -135,7 +172,7 @@ export default function PaymentsPage() {
                   <select 
                     className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
                     value={purposeType}
-                    onChange={(e) => setPurposeType(e.target.value as any)}
+                    onChange={(e) => handlePurposeTypeChange(e.target.value)}
                   >
                     <option value="MONTHLY">Monthly Rent</option>
                     <option value="YEARLY">Full Year Advance</option>

@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { NotificationType } from "@prisma/client";
 
 export async function sendNotification(
   userId: string, 

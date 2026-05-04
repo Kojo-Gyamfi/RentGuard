@@ -1,0 +1,199 @@
+﻿
+> temp-app@0.1.0 lint
+> eslint
+
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\scratch_check.js
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\scratch_check_profile.js
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\actions\admin.ts
+  29:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  60:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  76:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\actions\agreement.ts
+  23:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\actions\dashboard.ts
+  63:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\actions\property.ts
+    6:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   86:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\actions\user.ts
+  52:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  70:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\api\cron\rent-reminders\route.ts
+  47:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\api\user\verify\route.ts
+  22:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\admin\page.tsx
+  5:29  warning  'CardHeader' is defined but never used    @typescript-eslint/no-unused-vars
+  5:41  warning  'CardTitle' is defined but never used     @typescript-eslint/no-unused-vars
+  9:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\agreements\page.tsx
+  12:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  22:11  error    Error: Cannot access variable before it is declared
+
+`loadAgreements` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\agreements\page.tsx:22:11
+  20 |           const userRole = res.user.role;
+  21 |           setRole(userRole);
+> 22 |           loadAgreements(userRole as "LANDLORD" | "TENANT");
+     |           ^^^^^^^^^^^^^^ `loadAgreements` accessed before it is declared
+  23 |         } else {
+  24 |           setLoading(false);
+  25 |         }
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\agreements\page.tsx:30:3
+  28 |   }, [user]);
+  29 |
+> 30 |   const loadAgreements = async (userRole: "LANDLORD" | "TENANT") => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 31 |     if (!user) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^
+> 32 |     const res = await getAgreements(user.id, userRole);
+     | ^^^^^^^^^^^^^^^^^^^^^^
+> 33 |     if (res.success) setAgreements(res.agreements || []);
+     | ^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^
+> 35 |   };
+     | ^^^^^ `loadAgreements` is declared here
+  36 |
+  37 |   if (loading) return (
+  38 |     <div className="flex justify-center items-center h-48">  react-hooks/immutability
+  28:6   warning  React Hook useEffect has a missing dependency: 'loadAgreements'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\applications\page.tsx
+   17:52  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   33:6   warning  React Hook useEffect has a missing dependency: 'loadApplications'. Either include it or remove the dependency array                                                                                                                                                                      react-hooks/exhaustive-deps
+   46:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   56:11  warning  'action' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   57:11  warning  'confirmToast' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   62:58  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   67:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   74:53  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   76:68  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  160:64  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  175:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  221:82  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  221:96  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  362:25  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  362:67  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\lease\page.tsx
+  12:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\page.tsx
+   9:73  warning  'ShieldCheck' is defined but never used   @typescript-eslint/no-unused-vars
+  15:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\payments\page.tsx
+   20:44   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   21:48   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   42:190  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   43:130  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  129:57   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  138:71   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\properties\[id]\edit\page.tsx
+  12:44  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  27:6   warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\properties\browse\page.tsx
+  15:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  54:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  54:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  87:57  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  99:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\properties\page.tsx
+  14:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  95:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\settings\page.tsx
+   16:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\users\page.tsx
+  9:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\dashboard\verifications\page.tsx
+    5:64  warning  'CardDescription' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   12:38  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   95:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  105:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\app\page.tsx
+   5:10  warning  'Badge' is defined but never used           @typescript-eslint/no-unused-vars
+   6:10  warning  'Card' is defined but never used            @typescript-eslint/no-unused-vars
+   6:16  warning  'CardContent' is defined but never used     @typescript-eslint/no-unused-vars
+  48:7   warning  'stats' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\components\Header.tsx
+    7:10  warning  'Button' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   12:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+   25:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\components\Header.tsx:25:5
+  23 |
+  24 |   useEffect(() => {
+> 25 |     fetchNotifications();
+     |     ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |     // Simple polling every 30 seconds for new notifications
+  27 |     const interval = setInterval(fetchNotifications, 30000);
+  28 |     return () => clearInterval(interval);  react-hooks/set-state-in-effect
+   29:6   warning  React Hook useEffect has a missing dependency: 'fetchNotifications'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+  112:24  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react/no-unescaped-entities
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\components\PropertyForm.tsx
+    3:20  warning  'useEffect' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   17:17  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  119:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  201:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  215:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\components\Sidebar.tsx
+  20:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\components\ui\Textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\contexts\AuthContext.tsx
+  47:6  warning  React Hook useEffect has a missing dependency: 'supabase.auth'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\NEXT-JS-PROJECTS\RentGuard\RentGuard\src\lib\notifications.ts
+  2:10  warning  'NotificationType' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 91 problems (63 errors, 28 warnings)
+

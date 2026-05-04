@@ -7,9 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { FileText, Calendar, DollarSign, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface Agreement {
+  id: string;
+  startDate: string | Date;
+  endDate: string | Date;
+  rentAmount: number;
+  status: string;
+  property: {
+    title: string;
+  };
+  landlord: {
+    name: string;
+  };
+}
+
 export default function TenantLeasePage() {
   const { user } = useAuth();
-  const [agreements, setAgreements] = useState<any[]>([]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

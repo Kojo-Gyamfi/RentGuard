@@ -2,14 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { getPendingVerifications, approveVerification } from "@/app/actions/admin";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, User, Mail, Phone, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
+
+interface VerificationUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  ghanaCardFrontUrl: string | null;
+  ghanaCardBackUrl: string | null;
+  createdAt: string | Date;
+}
 
 export default function VerificationsPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<VerificationUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -89,26 +101,34 @@ export default function VerificationsPage() {
               </CardHeader>
               <CardContent className="pt-5 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Front View</p>
-                    <a href={u.ghanaCardFrontUrl} target="_blank" rel="noreferrer">
-                      <img
-                        src={u.ghanaCardFrontUrl}
-                        alt="Front Side"
-                        className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
-                      />
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Back View</p>
-                    <a href={u.ghanaCardBackUrl} target="_blank" rel="noreferrer">
-                      <img
-                        src={u.ghanaCardBackUrl}
-                        alt="Back Side"
-                        className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
-                      />
-                    </a>
-                  </div>
+                  {u.ghanaCardFrontUrl && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Front View</p>
+                      <a href={u.ghanaCardFrontUrl} target="_blank" rel="noreferrer">
+                        <Image
+                          src={u.ghanaCardFrontUrl}
+                          alt="Front Side"
+                          width={320}
+                          height={180}
+                          className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                        />
+                      </a>
+                    </div>
+                  )}
+                  {u.ghanaCardBackUrl && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">Back View</p>
+                      <a href={u.ghanaCardBackUrl} target="_blank" rel="noreferrer">
+                        <Image
+                          src={u.ghanaCardBackUrl}
+                          alt="Back Side"
+                          width={320}
+                          height={180}
+                          className="w-full h-24 object-cover rounded-md border border-gray-200 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                        />
+                      </a>
+                    </div>
+                  )}
                 </div>
                 <p className="text-[10px] text-muted-foreground text-center">Click images to view full size</p>
               </CardContent>

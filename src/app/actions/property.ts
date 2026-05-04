@@ -1,9 +1,18 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-export async function createProperty(data: any, supabaseUserId: string) {
+interface PropertyInput {
+  title: string;
+  description: string;
+  location: string;
+  price: number | string;
+  images?: string[];
+}
+
+export async function createProperty(data: PropertyInput, supabaseUserId: string) {
   try {
     const user = await prisma.user.findUnique({ where: { supabaseUserId } });
     if (!user || user.role !== "LANDLORD") {
@@ -15,7 +24,7 @@ export async function createProperty(data: any, supabaseUserId: string) {
         title: data.title,
         description: data.description,
         location: data.location,
-        price: parseFloat(data.price),
+        price: Number(data.price),
         status: "AVAILABLE",
         landlordId: user.id,
         images: data.images || ["https://placehold.co/600x400?text=Property"],
@@ -24,13 +33,13 @@ export async function createProperty(data: any, supabaseUserId: string) {
 
     revalidatePath("/dashboard/properties");
     return { success: true, property };
-  } catch (error: any) {
-    console.error("Error creating property:", error);
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
-export async function updateProperty(id: string, data: any, supabaseUserId: string) {
+export async function updateProperty(id: string, data: PropertyInput, supabaseUserId: string) {
   try {
     const user = await prisma.user.findUnique({ where: { supabaseUserId } });
     if (!user || user.role !== "LANDLORD") {
@@ -43,16 +52,17 @@ export async function updateProperty(id: string, data: any, supabaseUserId: stri
         title: data.title,
         description: data.description,
         location: data.location,
-        price: parseFloat(data.price),
+        price: Number(data.price),
         images: data.images,
       },
     });
 
     revalidatePath("/dashboard/properties");
     return { success: true, property };
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     console.error("Error updating property:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -83,9 +93,10 @@ export async function deleteProperty(id: string, supabaseUserId: string) {
     revalidatePath("/dashboard/properties");
     revalidatePath("/dashboard/properties/browse");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     console.error("Error deleting property:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -96,8 +107,9 @@ export async function getPropertyById(id: string) {
       include: { landlord: { select: { name: true, email: true } } },
     });
     return { success: true, property };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
@@ -111,14 +123,20 @@ export async function getPropertiesByLandlord(supabaseUserId: string) {
       orderBy: { createdAt: "desc" },
     });
     return { success: true, properties };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 
-export async function getAllAvailableProperties(filters?: { location?: string; maxPrice?: number }) {
+interface PropertyFilters {
+  location?: string;
+  maxPrice?: number;
+}
+
+export async function getAllAvailableProperties(filters?: PropertyFilters) {
   try {
-    const where: any = { status: "AVAILABLE" };
+    const where: Prisma.PropertyWhereInput = { status: "AVAILABLE" };
     if (filters?.location) {
       where.location = { contains: filters.location, mode: "insensitive" };
     }
@@ -132,8 +150,9 @@ export async function getAllAvailableProperties(filters?: { location?: string; m
       include: { landlord: { select: { name: true, email: true } } },
     });
     return { success: true, properties };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: message };
   }
 }
 

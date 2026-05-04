@@ -6,12 +6,41 @@ import { getAgreements } from "@/app/actions/agreement";
 import { getUserProfile } from "@/app/actions/user";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FileText, Calendar, DollarSign, User, Mail, Phone, MapPin } from "lucide-react";
+import { useCallback } from "react";
+
+interface Agreement {
+  id: string;
+  property: {
+    title: string;
+    location: string;
+  };
+  tenant: {
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+  landlord: {
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+  startDate: Date | string;
+  endDate: Date | string;
+  rentAmount: number;
+}
 
 export default function AgreementsPage() {
   const { user } = useAuth();
-  const [agreements, setAgreements] = useState<any[]>([]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
+
+  const loadAgreements = useCallback(async (userRole: "LANDLORD" | "TENANT") => {
+    if (!user) return;
+    const res = await getAgreements(user.id, userRole);
+    if (res.success) setAgreements(res.agreements as Agreement[] || []);
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -25,14 +54,7 @@ export default function AgreementsPage() {
         }
       });
     }
-  }, [user]);
-
-  const loadAgreements = async (userRole: "LANDLORD" | "TENANT") => {
-    if (!user) return;
-    const res = await getAgreements(user.id, userRole);
-    if (res.success) setAgreements(res.agreements || []);
-    setLoading(false);
-  };
+  }, [user, loadAgreements]);
 
   if (loading) return (
     <div className="flex justify-center items-center h-48">
